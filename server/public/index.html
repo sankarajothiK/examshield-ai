@@ -1,0 +1,2330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ExamShield AI - Smart Online Examination & Proctoring Platform</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>" />
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind Play CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff', 100: '#e0effe', 200: '#bbdffd', 300: '#7cc2fd', 400: '#36a2fa',
+              500: '#0c85eb', 600: '#0267c7', 700: '#0352a1', 800: '#074685', 900: '#0c3b6e',
+            },
+            tealbrand: {
+              50: '#f0fdfa', 100: '#ccfbf1', 200: '#99f6e4', 300: '#5eead4', 400: '#2dd4bf',
+              500: '#14b8a6', 600: '#0d9488', 700: '#0f766e', 800: '#115e59', 900: '#134e4a',
+            }
+          },
+          fontFamily: {
+            sans: ['Outfit', 'sans-serif'],
+            mono: ['Fira Code', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Global Custom CSS (Glassmorphism & Gradients) -->
+  <style>
+    body {
+      font-family: 'Outfit', 'sans-serif';
+      transition: background-color 0.3s, color 0.3s;
+    }
+    body.dark {
+      background-color: #030712 !important;
+      color: #f8fafc !important;
+    }
+    .medical-gradient {
+      background: linear-gradient(135deg, #ffffff 0%, #f4f9ff 50%, #e8fcf9 100%);
+    }
+    .dark .medical-gradient {
+      background: linear-gradient(135deg, #020617 0%, #06162d 60%, #032323 100%);
+    }
+    .glassmorphism {
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.45);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+    }
+    .dark .glassmorphism {
+      background: rgba(11, 18, 36, 0.7);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      border: 1px solid rgba(255, 255, 255, 0.07);
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Production Dark Theme contrast and typography fixes */
+    .dark .text-slate-100 { color: #f1f5f9 !important; }
+    .dark .text-slate-150 { color: #e2e8f0 !important; }
+    .dark .text-slate-200 { color: #cbd5e1 !important; }
+    .dark .text-slate-202 { color: #e2e8f0 !important; }
+    .dark .text-slate-205 { color: #cbd5e1 !important; }
+    .dark .text-slate-250 { color: #e2e8f0 !important; }
+    .dark .text-slate-255 { color: #cbd5e1 !important; }
+    .dark .text-slate-300 { color: #cbd5e1 !important; }
+    .dark .text-slate-305 { color: #e2e8f0 !important; }
+    .dark .text-slate-350 { color: #94a3b8 !important; }
+    .dark .text-slate-355 { color: #cbd5e1 !important; }
+    .dark .text-slate-400 { color: #94a3b8 !important; }
+    .dark .text-slate-405 { color: #94a3b8 !important; }
+    .dark .text-slate-450 { color: #94a3b8 !important; }
+    .dark .text-slate-455 { color: #94a3b8 !important; }
+    .dark .text-slate-500 { color: #94a3b8 !important; }
+    .dark .text-slate-505 { color: #94a3b8 !important; }
+    .dark .text-slate-600 { color: #94a3b8 !important; }
+    .dark .text-slate-700 { color: #e2e8f0 !important; }
+    .dark .text-slate-805 { color: #f1f5f9 !important; }
+    .dark .text-slate-800 { color: #f1f5f9 !important; }
+    .dark .text-slate-850 { color: #f8fafc !important; }
+    .dark .text-slate-855 { color: #f8fafc !important; }
+    .dark .text-slate-900 { color: #f8fafc !important; }
+
+    /* Dark Mode background contrast blocks */
+    .dark .bg-slate-50 { background-color: #030712 !important; }
+    .dark .bg-slate-100 { background-color: #0f172a !important; }
+    .dark .bg-slate-105 { background-color: #1e293b !important; }
+    .dark .bg-slate-200 { background-color: #1e293b !important; }
+    .dark .bg-slate-900 { background-color: #0f172a !important; }
+    .dark .bg-slate-950 { background-color: #030712 !important; }
+    .dark .bg-slate-955 { background-color: #030712 !important; }
+    
+    /* Dark Mode borders high visibility */
+    .dark .border-slate-100 { border-color: #1e293b !important; }
+    .dark .border-slate-200 { border-color: #334155 !important; }
+    .dark .border { border-color: #334155 !important; }
+    .dark .border-b { border-color: #334155 !important; }
+    .dark .border-t { border-color: #334155 !important; }
+    .glow-blue {
+      filter: blur(100px);
+      background: radial-gradient(circle, rgba(12, 133, 235, 0.18) 0%, rgba(12, 133, 235, 0) 70%);
+    }
+    .glow-cyan {
+      filter: blur(100px);
+      background: radial-gradient(circle, rgba(20, 184, 166, 0.16) 0%, rgba(20, 184, 166, 0) 70%);
+    }
+    .warning-pulse {
+      animation: warningPulse 2s infinite ease-in-out;
+    }
+    @keyframes warningPulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.015); opacity: 0.92; }
+    }
+    
+    .scan-laser {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 3px;
+      background: linear-gradient(to right, transparent, #2dd4bf, #0c85eb, #2dd4bf, transparent);
+      animation: scanningEffect 2s linear infinite;
+      box-shadow: 0 0 10px rgba(45, 212, 191, 0.8);
+      z-index: 10;
+    }
+    @keyframes scanningEffect {
+      0% { top: 0%; }
+      50% { top: 100%; }
+      100% { top: 0%; }
+    }
+    
+    .scanning-grid {
+      background-size: 20px 20px;
+      background-image: 
+        linear-gradient(to right, rgba(12, 133, 235, 0.05) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(12, 133, 235, 0.05) 1px, transparent 1px);
+    }
+  </style>
+
+  <!-- React CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js" crossorigin></script>
+  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Babel CDN for compiling JSX in browser -->
+  <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.24.4/babel.min.js"></script>
+
+  <!-- Chart.js and Socket.io -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+
+  <!-- TensorFlow.js and COCO-SSD models CDNs -->
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.19.0/dist/tf.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 dark:bg-slate-955 dark:text-slate-100">
+  <div id="root"></div>
+
+  <!-- React code -->
+  <script type="text/babel">
+    const { useState, useEffect, useRef, createContext, useContext } = React;
+
+    const API_BASE = 'http://localhost:5000/api';
+
+    const getHeaders = () => {
+      const headers = { 'Content-Type': 'application/json' };
+      const token = localStorage.getItem('token');
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+      return headers;
+    };
+
+    const api = {
+      get: async (endpoint) => {
+        const res = await fetch(`${API_BASE}${endpoint}`, { method: 'GET', headers: getHeaders() });
+        return res.json();
+      },
+      post: async (endpoint, body) => {
+        const res = await fetch(`${API_BASE}${endpoint}`, {
+          method: 'POST',
+          headers: getHeaders(),
+          body: JSON.stringify(body)
+        });
+        return res.json();
+      },
+      put: async (endpoint, body) => {
+        const res = await fetch(`${API_BASE}${endpoint}`, {
+          method: 'PUT',
+          headers: getHeaders(),
+          body: JSON.stringify(body)
+        });
+        return res.json();
+      },
+      delete: async (endpoint) => {
+        const res = await fetch(`${API_BASE}${endpoint}`, { method: 'DELETE', headers: getHeaders() });
+        return res.json();
+      },
+      uploadFile: async (endpoint, file) => {
+        const formData = new FormData();
+        formData.append('file', file);
+        const token = localStorage.getItem('token');
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+        const res = await fetch(`${API_BASE}${endpoint}`, { method: 'POST', headers, body: formData });
+        return res.json();
+      }
+    };
+
+    // --- CONTEXT PROVIDERS ---
+    const AuthContext = createContext(null);
+    const AuthProvider = ({ children }) => {
+      const [user, setUser] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const loadUser = async () => {
+          const token = localStorage.getItem('token');
+          if (!token) { setLoading(false); return; }
+          try {
+            const res = await api.get('/auth/me');
+            if (res.success) setUser(res.data);
+            else localStorage.removeItem('token');
+          } catch (e) {
+            localStorage.removeItem('token');
+          } finally { setLoading(false); }
+        };
+        loadUser();
+      }, []);
+
+      const login = async (email, password, role) => {
+        setLoading(true);
+        const res = await api.post('/auth/login', { email, password, role });
+        if (res.success) {
+          localStorage.setItem('token', res.data.token);
+          setUser(res.data);
+        }
+        setLoading(false);
+        return res;
+      };
+
+      const register = async (name, email, password) => {
+        setLoading(true);
+        const res = await api.post('/auth/register', { name, email, password });
+        if (res.success) {
+          localStorage.setItem('token', res.data.token);
+          setUser(res.data);
+        }
+        setLoading(false);
+        return res;
+      };
+
+      const verifyEmail = async (code) => {
+        const res = await api.post('/auth/verify', { code });
+        if (res.success) {
+          setUser(prev => prev ? { ...prev, isVerified: true } : null);
+          return true;
+        }
+        return false;
+      };
+
+      const logout = () => {
+        localStorage.removeItem('token');
+        setUser(null);
+      };
+
+      return (
+        <AuthContext.Provider value={{ user, loading, login, register, verifyEmail, logout }}>
+          {children}
+        </AuthContext.Provider>
+      );
+    };
+
+    const DarkModeContext = createContext(null);
+    const DarkModeProvider = ({ children }) => {
+      const [darkMode, setDarkMode] = useState(() => JSON.parse(localStorage.getItem('darkMode') || 'false'));
+      useEffect(() => {
+        if (darkMode) document.body.classList.add('dark');
+        else document.body.classList.remove('dark');
+        localStorage.setItem('darkMode', JSON.stringify(darkMode));
+      }, [darkMode]);
+      const toggleDarkMode = () => setDarkMode(prev => !prev);
+      return (
+        <DarkModeContext.Provider value={{ darkMode, toggleDarkMode }}>
+          {children}
+        </DarkModeContext.Provider>
+      );
+    };
+
+    // --- CUSTOM CANVAS CHARTS COMPONENTS ---
+    const LineChart = ({ data, options }) => {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+
+      useEffect(() => {
+        if (canvasRef.current) {
+          if (chartRef.current) chartRef.current.destroy();
+          chartRef.current = new Chart(canvasRef.current, {
+            type: 'line',
+            data,
+            options
+          });
+        }
+        return () => { if (chartRef.current) chartRef.current.destroy(); };
+      }, [data, options]);
+
+      return <canvas ref={canvasRef} />;
+    };
+
+    const BarChart = ({ data, options }) => {
+      const canvasRef = useRef(null);
+      const chartRef = useRef(null);
+
+      useEffect(() => {
+        if (canvasRef.current) {
+          if (chartRef.current) chartRef.current.destroy();
+          chartRef.current = new Chart(canvasRef.current, {
+            type: 'bar',
+            data,
+            options
+          });
+        }
+        return () => { if (chartRef.current) chartRef.current.destroy(); };
+      }, [data, options]);
+
+      return <canvas ref={canvasRef} />;
+    };
+
+    // --- VECTOR SVG ICON COMPILATION ---
+    const Icons = {
+      Shield: ({ className = "w-5 h-5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/>
+        </svg>
+      ),
+      Dashboard: ({ className = "w-4.5 h-4.5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/>
+        </svg>
+      ),
+      Book: ({ className = "w-4.5 h-4.5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/>
+        </svg>
+      ),
+      Question: ({ className = "w-4.5 h-4.5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z"/>
+        </svg>
+      ),
+      Live: ({ className = "w-4.5 h-4.5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M9.375 9a3.75 3.75 0 117.5 0 3.75 3.75 0 01-7.5 0z"/>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 12c0-1.232-.046-2.453-.138-3.662a4.006 4.006 0 00-3.7-3.7 48.656 48.656 0 00-7.324 0 4.006 4.006 0 00-3.7 3.7C4.547 9.547 4.5 10.768 4.5 12s.047 2.453.138 3.662a4.006 4.006 0 003.7 3.7 48.656 48.656 0 007.324 0 4.006 4.006 0 003.7-3.7c.092-1.209.138-2.43.138-3.662z"/>
+        </svg>
+      ),
+      Clock: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      ),
+      Calendar: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+        </svg>
+      ),
+      Play: ({ className = "w-3 h-3" }) => (
+        <svg className={className} fill="currentColor" viewBox="0 0 24 24">
+          <path d="M8 5v14l11-7z"/>
+        </svg>
+      ),
+      Bell: ({ className = "w-5 h-5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a3 3 0 11-5.714 0"/>
+        </svg>
+      ),
+      Trash: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"/>
+        </svg>
+      ),
+      Plus: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+        </svg>
+      ),
+      Search: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/>
+        </svg>
+      ),
+      Download: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5M16.5 12L12 16.5m0 0L7.5 12m4.5 4.5V3"/>
+        </svg>
+      ),
+      ArrowLeft: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/>
+        </svg>
+      ),
+      Check: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5"/>
+        </svg>
+      ),
+      Alert: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/>
+        </svg>
+      ),
+      ChevronLeft: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"/>
+        </svg>
+      ),
+      ChevronRight: ({ className = "w-4 h-4" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5"/>
+        </svg>
+      ),
+      Camera: ({ className = "w-5 h-5" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z"/>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z"/>
+        </svg>
+      ),
+      Upload: ({ className = "w-6 h-6" }) => (
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5"/>
+        </svg>
+      )
+    };
+
+    // --- REUSABLE COMPONENTS & PAGE VIEWS ---
+
+    // 1. Navigation Header Bar
+    const Navbar = ({ currentView, setView }) => {
+      const { user, logout } = useContext(AuthContext);
+      const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
+      const [notifications, setNotifications] = useState([]);
+      const [showNotif, setShowNotif] = useState(false);
+
+      useEffect(() => {
+        if (user) {
+          api.get('/notifications').then(res => {
+            if (res.success) setNotifications(res.data.slice(0, 5));
+          });
+        }
+      }, [user, currentView]);
+
+      const markRead = (id) => {
+        api.put(`/notifications/${id}/read`).then(() => {
+          setNotifications(prev => prev.map(n => n._id === id ? { ...n, read: true } : n));
+        });
+      };
+
+      if (!user) return null;
+
+      const isAdmin = user.role === 'admin';
+
+      return (
+        <nav className="sticky top-0 z-45 w-full glassmorphism px-6 py-3 flex items-center justify-between shadow-md">
+          <div className="flex items-center gap-2.5 cursor-pointer" onClick={() => setView(isAdmin ? 'admin-dashboard' : 'student-dashboard')}>
+            <span className="text-2xl">🛡️</span>
+            <div className="flex flex-col text-left">
+              <span className="text-base font-extrabold tracking-tight text-brand-900 dark:text-brand-100 leading-none font-sans">ExamShield AI</span>
+              <span className="text-[9px] font-bold text-tealbrand-600 dark:text-tealbrand-400 tracking-widest mt-0.5 uppercase">PROCTORING PORTAL</span>
+            </div>
+          </div>
+
+          <div className="hidden md:flex items-center gap-2">
+            {isAdmin ? (
+              <>
+                <button onClick={() => setView('admin-dashboard')} className={`text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all ${currentView === 'admin-dashboard' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  <Icons.Dashboard className="w-3.5 h-3.5" /> Dashboard
+                </button>
+                <button onClick={() => setView('admin-manage-tests')} className={`text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all ${currentView === 'admin-manage-tests' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  <Icons.Book className="w-3.5 h-3.5" /> Manage Exams
+                </button>
+                <button onClick={() => setView('admin-questions')} className={`text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all ${currentView === 'admin-questions' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  <Icons.Question className="w-3.5 h-3.5" /> Question Bank
+                </button>
+                <button onClick={() => setView('admin-live-monitor')} className={`text-xs font-bold px-3.5 py-2 rounded-xl text-red-500 animate-pulse flex items-center gap-1.5 transition-all ${currentView === 'admin-live-monitor' ? 'bg-red-500 text-white animate-none shadow-sm' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  <Icons.Live className="w-3.5 h-3.5 text-red-500" /> Live Monitor
+                </button>
+              </>
+            ) : (
+              <>
+                <button onClick={() => setView('student-dashboard')} className={`text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all ${currentView === 'student-dashboard' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-350 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  <Icons.Book className="w-3.5 h-3.5" /> Dashboard
+                </button>
+              </>
+            )}
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button onClick={toggleDarkMode} className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors border border-slate-200/40 dark:border-slate-850">
+              {darkMode ? '☀️' : '🌙'}
+            </button>
+
+            <div className="relative">
+              <button onClick={() => setShowNotif(!showNotif)} className="p-2 rounded-xl text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 relative border border-slate-200/40 dark:border-slate-850">
+                <Icons.Bell className="w-4.5 h-4.5" />
+                {notifications.filter(n => !n.read).length > 0 && <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full animate-bounce"></span>}
+              </button>
+              {showNotif && (
+                <div className="absolute right-0 mt-2 w-72 glassmorphism rounded-2xl shadow-xl border border-slate-200 dark:border-slate-800 py-2.5 z-50 text-left">
+                  <div className="px-4 py-1.5 border-b border-slate-100 dark:border-slate-800 text-[10px] font-bold text-slate-455 uppercase tracking-widest">Alert Logs</div>
+                  <div className="max-h-56 overflow-y-auto">
+                    {notifications.length === 0 ? <div className="p-4 text-center text-xs text-slate-400">Empty</div> : (
+                      notifications.map(n => (
+                        <div key={n._id} onClick={() => markRead(n._id)} className={`px-4 py-2.5 border-b border-slate-50 dark:border-slate-800/40 last:border-0 hover:bg-slate-50/50 cursor-pointer ${!n.read ? 'bg-brand-50/10' : ''}`}>
+                          <div className="text-[11px] font-bold text-slate-800 dark:text-slate-200">{n.title}</div>
+                          <div className="text-[9.5px] text-slate-400 mt-0.5">{n.message}</div>
+                        </div>
+                      ))
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800 pl-3">
+              <div className="w-8 h-8 rounded-full bg-brand-500 text-white font-extrabold flex items-center justify-center text-xs shadow-inner">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <button onClick={() => { logout(); setView('landing'); }} className="p-1.5 text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-colors">
+                ❌
+              </button>
+            </div>
+          </div>
+        </nav>
+      );
+    };
+
+    // 2. Landing Page
+    const LandingPage = ({ setView }) => {
+      const { user } = useContext(AuthContext);
+      
+      return (
+        <div className="min-h-screen medical-gradient overflow-x-hidden relative flex flex-col justify-between">
+          <div className="absolute top-10 left-10 w-96 h-96 rounded-full glow-blue"></div>
+          <div className="absolute bottom-20 right-20 w-[30rem] h-[30rem] rounded-full glow-cyan"></div>
+          
+          {/* Hero Section */}
+          <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center pt-16 pb-20 relative z-10 text-left font-sans">
+            <div className="space-y-6">
+              <span className="inline-flex items-center gap-2 px-4 py-1.5 bg-brand-100/50 dark:bg-brand-950/40 text-brand-700 dark:text-brand-300 text-xs font-bold rounded-full border border-brand-200/30 shadow-sm">
+                <Icons.Shield className="w-3.5 h-3.5 text-brand-500 animate-pulse" /> AI-Powered Secure Proctoring Core
+              </span>
+              <h1 className="text-4xl sm:text-6xl font-extrabold text-slate-900 dark:text-slate-50 leading-tight tracking-tight">
+                Enterprise Grade <br />
+                <span className="bg-gradient-to-r from-brand-600 to-tealbrand-500 bg-clip-text text-transparent">Examination Shield</span>
+              </h1>
+              <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 leading-relaxed font-sans max-w-lg">
+                ExamShield AI provides a continuous biometric eye-tracking, local object scanning, and secure browser lockout environment optimized for medical academies and professional screenings.
+              </p>
+              
+              <div className="flex flex-wrap gap-4 pt-2">
+                {user ? (
+                  <button onClick={() => setView(user.role === 'admin' ? 'admin-dashboard' : 'student-dashboard')} className="px-6 py-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md hover:-translate-y-0.5 transition-all text-xs flex items-center gap-1.5 font-sans">
+                    Enter Dashboard <Icons.ChevronRight className="w-4 h-4" />
+                  </button>
+                ) : (
+                  <>
+                    <button onClick={() => setView('login')} className="px-6 py-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl font-bold shadow-md hover:-translate-y-0.5 transition-all text-xs">
+                      Sign In Portal
+                    </button>
+                    <button onClick={() => setView('register')} className="px-6 py-3.5 bg-white hover:bg-slate-50 text-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 rounded-xl font-bold border border-slate-200 dark:border-slate-800 shadow-sm hover:-translate-y-0.5 transition-all text-xs">
+                      Create Profile
+                    </button>
+                  </>
+                )}
+              </div>
+
+              {/* Bullet Quick Features */}
+              <div className="grid grid-cols-2 gap-4 pt-6 border-t border-slate-200/50 dark:border-slate-800/40 text-[11px] font-bold text-slate-655 dark:text-slate-400">
+                <div className="flex items-center gap-2"><span className="text-tealbrand-500">✓</span> TensorFlow.js Gaze Track</div>
+                <div className="flex items-center gap-2"><span className="text-tealbrand-500">✓</span> Fullscreen Secure Locks</div>
+                <div className="flex items-center gap-2"><span className="text-tealbrand-500">✓</span> Dynamic Grader Engine</div>
+                <div className="flex items-center gap-2"><span className="text-tealbrand-500">✓</span> Verifiable PDF Scorecards</div>
+              </div>
+            </div>
+
+            {/* AI HUD Interactive Mockup */}
+            <div className="p-6 bg-slate-900/90 dark:bg-slate-955/70 border border-slate-800 rounded-3xl shadow-2xl relative scanning-grid overflow-hidden aspect-video max-w-lg mx-auto w-full">
+              <div className="absolute top-4 left-4 z-20 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                <span className="text-[8px] font-bold tracking-widest text-white uppercase bg-red-600/30 px-2 py-0.5 rounded border border-red-500/20">LIVE CAMERA SCANNER</span>
+              </div>
+              <div className="scan-laser"></div>
+              
+              <div className="w-full h-full flex flex-col justify-between items-center py-6 relative z-10">
+                <div className="w-24 h-24 rounded-full border-2 border-dashed border-tealbrand-400/60 flex items-center justify-center animate-spin-slow mt-4">
+                  <div className="w-16 h-16 rounded-full border border-brand-500/40 flex items-center justify-center">
+                    <span className="text-[10px] font-mono text-tealbrand-400">AI TARGET</span>
+                  </div>
+                </div>
+
+                <div className="w-full px-4 space-y-2">
+                  <div className="flex justify-between items-center text-[9px] font-mono text-slate-400 bg-slate-950/60 p-2 rounded-xl border border-slate-800">
+                    <span>INTEGRITY INDEX: <strong className="text-tealbrand-400">98.4%</strong></span>
+                    <span>GAZE TRACKING: <strong className="text-tealbrand-400">SECURE</strong></span>
+                  </div>
+                  <div className="h-16 overflow-hidden text-[8px] font-mono text-green-400 text-left bg-black p-2 rounded-xl border border-slate-850 leading-relaxed space-y-0.5">
+                    <div>[21:52:10] AI-CORE: Initialized camera array...</div>
+                    <div className="animate-pulse">[21:52:12] COCO-SSD: Sweep scanning environment...</div>
+                    <div>[21:52:15] LOGIC: 0 unauthorized items. Status secure.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Stats banner */}
+          <div className="w-full bg-white/40 dark:bg-slate-900/35 border-y border-slate-200/50 dark:border-slate-800/40 py-8 relative z-10">
+            <div className="max-w-6xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
+              <div>
+                <span className="text-2xl sm:text-3xl font-extrabold text-brand-600 block">10,000+</span>
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-widest block mt-1">Exams Secured</span>
+              </div>
+              <div>
+                <span className="text-2xl sm:text-3xl font-extrabold text-brand-600 block">99.98%</span>
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-widest block mt-1">Integrity Index</span>
+              </div>
+              <div>
+                <span className="text-2xl sm:text-3xl font-extrabold text-brand-600 block">&lt; 100ms</span>
+                <span className="text-[10px] font-bold text-slate-450 uppercase tracking-widest block mt-1">Proctor Latency</span>
+              </div>
+              <div>
+                <span className="text-2xl sm:text-3xl font-extrabold text-brand-600 block">50+</span>
+                <span className="text-[10px] font-bold text-slate-455 uppercase tracking-widest block mt-1">Medical Academies</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Detailed Features grid */}
+          <div className="max-w-6xl mx-auto px-6 py-20 relative z-10 text-left font-sans">
+            <div className="text-center max-w-xl mx-auto mb-16 space-y-3">
+              <span className="text-[9px] font-extrabold text-tealbrand-600 dark:text-tealbrand-400 tracking-widest uppercase block">Uncompromising Security</span>
+              <h2 className="text-3xl font-extrabold text-slate-850 dark:text-slate-100">Smart Proctoring Architecture</h2>
+              <p className="text-xs text-slate-505 dark:text-slate-400 leading-relaxed">
+                Powered by lightweight client-side machine learning and strict browser event interception hooks.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/20 border border-brand-100/40 flex items-center justify-center text-brand-500 mb-5">
+                  <Icons.Camera className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-205">AI Biometrics & Gaze</h3>
+                <p className="text-[11.5px] text-slate-505 dark:text-slate-400 mt-2.5 leading-relaxed">
+                  Runs local eye and device classification loops. Automatically logs look-away angles and flags mobile devices.
+                </p>
+              </div>
+
+              <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/20 border border-brand-100/40 flex items-center justify-center text-brand-500 mb-5">
+                  <Icons.Shield className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-205">Strict Sandbox Lockouts</h3>
+                <p className="text-[11.5px] text-slate-505 dark:text-slate-400 mt-2.5 leading-relaxed">
+                  Prevents copy-paste, context menu options, and window switches. Exceeding warning limits auto-submits attempts.
+                </p>
+              </div>
+
+              <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200/60 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+                <div className="w-10 h-10 rounded-xl bg-brand-50 dark:bg-brand-950/20 border border-brand-100/40 flex items-center justify-center text-brand-500 mb-5">
+                  <Icons.Book className="w-5 h-5" />
+                </div>
+                <h3 className="text-sm font-extrabold text-slate-855 dark:text-slate-205">Audit Result Records</h3>
+                <p className="text-[11.5px] text-slate-505 dark:text-slate-400 mt-2.5 leading-relaxed font-sans">
+                  Generates detailed scorecard PDFs complete with performance metrics charts and cryptographic QR code audit hashes.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <footer className="w-full py-6 border-t border-slate-200/50 dark:border-slate-800/40 relative z-10 text-xs font-bold text-slate-400 flex justify-between items-center px-8">
+            <span>© 2026 ExamShield AI Corporation. All rights reserved.</span>
+            <span className="flex items-center gap-1.5"><span className="w-2 h-2 bg-green-500 rounded-full animate-ping"></span> Platform secured</span>
+          </footer>
+        </div>
+      );
+    };
+
+    // 3. Login Page
+    const LoginPage = ({ setView }) => {
+      const { login } = useContext(AuthContext);
+      const [role, setRole] = useState('student');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+          const res = await login(email, password, role);
+          if (res.success) {
+            if (!res.data.isVerified && res.data.role === 'student') setView('verify');
+            else setView(res.data.role === 'admin' ? 'admin-dashboard' : 'student-dashboard');
+          } else {
+            setError(res.message || 'Login credentials mismatch.');
+          }
+        } catch (err) {
+          setError('Portal communication error.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="min-h-[90vh] flex items-center justify-center px-6">
+          <div className="w-full max-w-sm glassmorphism p-8 rounded-2xl shadow-xl text-left relative z-10">
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 text-center">Sign In</h2>
+            <div className="grid grid-cols-2 bg-slate-100 dark:bg-slate-900 rounded-xl p-1 mt-4 mb-6">
+              <button onClick={() => setRole('student')} className={`py-2 text-[10px] font-bold rounded-lg transition-all ${role === 'student' ? 'bg-white dark:bg-slate-800 text-brand-600 shadow' : 'text-slate-500'}`}>👨‍🎓 Student</button>
+              <button onClick={() => setRole('admin')} className={`py-2 text-[10px] font-bold rounded-lg transition-all ${role === 'admin' ? 'bg-white dark:bg-slate-800 text-brand-600 shadow' : 'text-slate-500'}`}>🛡️ Admin</button>
+            </div>
+            {error && <div className="p-3 bg-red-50 text-red-650 text-xs font-bold rounded-xl mb-4 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" /> {error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Email Address</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="student@academy.edu"/>
+              </div>
+              <div>
+                <div className="flex justify-between"><label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Password</label><span onClick={() => setView('forgot-password')} className="text-[10px] text-brand-600 cursor-pointer hover:underline">Forgot?</span></div>
+                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="••••••••"/>
+              </div>
+              <button type="submit" disabled={loading} className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex justify-center">
+                {loading ? 'Authenticating...' : 'Sign In'}
+              </button>
+            </form>
+            <div className="text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/40">
+              New Candidate? <span onClick={() => setView('register')} className="text-brand-600 font-bold cursor-pointer hover:underline">Register Account</span>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 4. Register Page
+    const RegisterPage = ({ setView }) => {
+      const { register } = useContext(AuthContext);
+      const [name, setName] = useState('');
+      const [email, setEmail] = useState('');
+      const [password, setPassword] = useState('');
+      const [error, setError] = useState('');
+      const [loading, setLoading] = useState(false);
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        try {
+          const res = await register(name, email, password);
+          if (res.success) {
+            setView('verify');
+          } else {
+            setError(res.message || 'Registration failed.');
+          }
+        } catch (err) {
+          setError('Portal communication error.');
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="min-h-[90vh] flex items-center justify-center px-6">
+          <div className="w-full max-w-sm glassmorphism p-8 rounded-2xl shadow-xl text-left z-10">
+            <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 text-center">Register Account</h2>
+            {error && <div className="p-3 bg-red-50 text-red-650 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" />{error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4 mt-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-450 tracking-wider">Full Name</label>
+                <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="John Doe"/>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Email Address</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-805 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="john.doe@med.com"/>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Password</label>
+                <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="Min 6 characters"/>
+              </div>
+              <button type="submit" disabled={loading} className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex justify-center">
+                {loading ? 'Creating Profile...' : 'Register Profile'}
+              </button>
+            </form>
+            <div className="text-center text-xs text-slate-500 mt-6 pt-4 border-t border-slate-200/50 dark:border-slate-800/40">
+              Already registered? <span onClick={() => setView('login')} className="text-brand-605 font-bold cursor-pointer hover:underline">Sign In</span>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 5. Verification Page
+    const VerificationPage = ({ setView }) => {
+      const { verifyEmail } = useContext(AuthContext);
+      const [code, setCode] = useState('');
+      const [error, setError] = useState('');
+      const [success, setSuccess] = useState('');
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        try {
+          const ok = await verifyEmail(code);
+          if (ok) {
+            setSuccess('Account verified successfully! Redirecting...');
+            setTimeout(() => { setView('student-dashboard'); }, 1500);
+          } else {
+            setError('Verification code invalid.');
+          }
+        } catch (err) {
+          setError('Verification error.');
+        }
+      };
+
+      return (
+        <div className="min-h-[90vh] flex items-center justify-center px-6">
+          <div className="w-full max-w-sm glassmorphism p-8 rounded-2xl shadow-xl text-left z-10">
+            <h2 className="text-2xl font-extrabold text-slate-805 dark:text-slate-100 text-center">Verify Email</h2>
+            {error && <div className="p-3 bg-red-50 text-red-650 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" />{error}</div>}
+            {success && <div className="p-3 bg-green-50 text-green-700 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Check className="w-3.5 h-3.5" />{success}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">6-Digit Code</label>
+                <input type="text" maxLength={6} required value={code} onChange={e => setCode(e.target.value.replace(/\D/g, ''))} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-center text-lg font-bold tracking-widest focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="123456"/>
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold">
+                Confirm Code
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    // 6. Forgot Password Page
+    const ForgotPasswordPage = ({ setView }) => {
+      const [email, setEmail] = useState('');
+      const [success, setSuccess] = useState('');
+      const [error, setError] = useState('');
+
+      const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setSuccess('');
+        try {
+          const res = await api.post('/auth/forgot-password', { email });
+          if (res.success) setSuccess(res.message);
+          else setError(res.message);
+        } catch (err) {
+          setError('Email lookup error.');
+        }
+      };
+
+      return (
+        <div className="min-h-[90vh] flex items-center justify-center px-6">
+          <div className="w-full max-w-sm glassmorphism p-8 rounded-2xl shadow-xl text-left z-10">
+            <span onClick={() => setView('login')} className="text-xs text-slate-405 hover:text-slate-700 cursor-pointer hover:underline mb-4 flex items-center gap-1 font-bold">
+              <Icons.ArrowLeft className="w-3.5 h-3.5" /> Back to Login
+            </span>
+            <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Forgot Password</h2>
+            {success && <div className="p-3.5 bg-tealbrand-50 text-tealbrand-700 text-xs font-bold rounded-xl my-4 border border-tealbrand-100/40 leading-relaxed">{success}</div>}
+            {error && <div className="p-3 bg-red-50 text-red-650 text-red-750 text-xs font-bold rounded-xl my-4 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" />{error}</div>}
+            <form onSubmit={handleSubmit} className="space-y-4 mt-2">
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Email Address</label>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="registered@academy.com"/>
+              </div>
+              <button type="submit" className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold">
+                Reset Password
+              </button>
+            </form>
+          </div>
+        </div>
+      );
+    };
+
+    // 7. Student Dashboard Page
+    const StudentDashboard = ({ setView, setSelectedTestId, setSelectedResultId }) => {
+      const [tests, setTests] = useState([]);
+      const [results, setResults] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      const loadData = async () => {
+        try {
+          const testRes = await api.get('/tests');
+          if (testRes.success) setTests(testRes.data);
+          const resultRes = await api.get('/results/my');
+          if (resultRes.success) setResults(resultRes.data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => { loadData(); }, []);
+
+      if (loading) {
+        return (
+          <div className="min-h-[50vh] flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-xs text-slate-400 mt-2 font-bold">Syncing student logs...</span>
+          </div>
+        );
+      }
+
+      const now = new Date();
+      const activeExams = tests.filter(t => {
+        const isOpen = now >= new Date(t.startDate) && now <= new Date(t.endDate);
+        const attemptedCount = results.filter(r => r.test?._id === t._id).length;
+        return isOpen && attemptedCount < t.maxAttempts;
+      });
+
+      const chartData = {
+        labels: results.slice().reverse().map((r, i) => `Exam ${i + 1}`),
+        datasets: [{
+          label: 'Qualifying Score %',
+          data: results.slice().reverse().map(r => r.percentage),
+          borderColor: '#0c85eb',
+          backgroundColor: 'rgba(12, 133, 235, 0.04)',
+          tension: 0.25,
+          fill: true,
+        }]
+      };
+
+      const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          y: { min: 0, max: 100, ticks: { font: { size: 9 } } },
+          x: { ticks: { font: { size: 9 } } }
+        }
+      };
+
+      return (
+        <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans">
+          <div className="glassmorphism p-6 rounded-2xl mb-8 relative overflow-hidden flex justify-between items-center border border-brand-100/30">
+            <div className="absolute top-0 right-0 w-48 h-48 bg-brand-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
+            <div className="relative z-10">
+              <span className="text-[9px] font-extrabold text-tealbrand-600 dark:text-tealbrand-400 tracking-widest uppercase block">Biomedical screening</span>
+              <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 leading-none font-sans">Qualifying Entrance Portal</h2>
+              <p className="text-xs text-slate-505 dark:text-slate-400 mt-2">Audit proctored entrance exams, check scorecard files, and review integrity logs.</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-7 space-y-6">
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-200 mb-4 flex items-center gap-1.5">
+                  <span className="flex w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span> Live Qualifying Exams
+                </h3>
+                {activeExams.length === 0 ? (
+                  <div className="p-6 glassmorphism rounded-2xl text-center text-xs text-slate-400 border border-dashed">Zero active qualifying exams available.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {activeExams.map(t => (
+                      <div key={t._id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-brand-300 transition-colors">
+                        <div>
+                          <span className="text-[9px] font-bold px-2 py-0.5 bg-brand-50 text-brand-700 rounded uppercase border">{t.questions.length} Qs</span>
+                          <h4 className="text-sm font-extrabold text-slate-850 dark:text-slate-100 mt-2">{t.title}</h4>
+                          <p className="text-[11px] text-slate-455 dark:text-slate-400 mt-1 leading-relaxed">{t.description}</p>
+                          <div className="flex gap-4 mt-3 text-[10px] text-slate-400 font-bold items-center">
+                            <span className="flex items-center gap-1"><Icons.Clock className="w-3.5 h-3.5" /> {t.duration} Mins</span>
+                            <span className="flex items-center gap-1"><Icons.Check className="w-3.5 h-3.5 text-green-500" /> Pass: {t.passingMarks}</span>
+                          </div>
+                        </div>
+                        <button onClick={() => { setSelectedTestId(t._id); setView('student-exam-setup'); }} className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 hover:translate-x-0.5 transition-transform shadow-sm">
+                          <Icons.Play className="w-3 h-3 text-white" /> Enter Setup
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-4">Qualifying Standing & Results</h3>
+                {results.length === 0 ? (
+                  <div className="p-6 glassmorphism rounded-2xl text-center text-xs text-slate-400">Zero past examinations registered.</div>
+                ) : (
+                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
+                    <table className="w-full text-xs">
+                      <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-500 uppercase border-b border-slate-100 dark:border-slate-800">
+                        <tr>
+                          <th className="px-5 py-3 text-left">Exam Module</th>
+                          <th className="px-5 py-3 text-center">Score</th>
+                          <th className="px-5 py-3 text-center">Result</th>
+                          <th className="px-5 py-3 text-center">Review</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                        {results.map(r => (
+                          <tr key={r._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                            <td className="px-5 py-3.5 text-left font-bold text-slate-800 dark:text-slate-200">{r.test?.title}<span className="block text-[9px] text-slate-400 font-normal mt-0.5">{new Date(r.createdAt).toLocaleDateString()}</span></td>
+                            <td className="px-5 py-3.5 text-center font-bold">{r.score} <span className="text-[9px] text-slate-400 block font-normal">{r.percentage}%</span></td>
+                            <td className="px-5 py-3.5 text-center">
+                              <span className={`px-2.5 py-0.5 text-[9px] font-bold rounded-full ${r.status === 'pass' ? 'bg-green-50 text-green-700 border border-green-200/20' : 'bg-red-50 text-red-700 border border-red-200/20'}`}>{r.status.toUpperCase()}</span>
+                            </td>
+                            <td className="px-5 py-3.5 text-center">
+                              <button onClick={() => { setSelectedResultId(r._id); setView('result-details'); }} className="px-3 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-[10px] shadow-sm">Report</button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 space-y-6">
+              {results.length > 0 && (
+                <div className="glassmorphism p-5 rounded-2xl shadow-sm border">
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase mb-4 tracking-widest flex items-center gap-1.5"><Icons.Dashboard className="w-4 h-4 text-brand-500" /> Progress Chart</h4>
+                  <div className="h-44 relative">
+                    <LineChart data={chartData} options={chartOptions} />
+                  </div>
+                </div>
+              )}
+
+              <div className="p-5 bg-brand-50/20 dark:bg-brand-950/10 border border-brand-100/50 dark:border-brand-900/20 rounded-2xl">
+                <h4 className="text-xs font-bold text-brand-700 dark:text-brand-300 uppercase tracking-widest mb-3 flex items-center gap-1"><Icons.Shield className="w-4 h-4 text-brand-500" /> Sandbox proctor rules</h4>
+                <ul className="text-[11px] text-slate-505 dark:text-slate-400 space-y-2 list-disc list-inside">
+                  <li>Leave camera active with clear face lighting.</li>
+                  <li>Keyboard copy/paste and right clicks are disabled.</li>
+                  <li>Tab switching and window exits trigger warning prompts.</li>
+                  <li>Exceeding 5 warning counters disqualifies the exam.</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 8. Admin Dashboard Page
+    const AdminDashboard = ({ setView, setSelectedResultId }) => {
+      const [stats, setStats] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        api.get('/tests/analytics').then(res => {
+          if (res.success) setStats(res.data);
+          setLoading(false);
+        });
+      }, []);
+
+      if (loading) {
+        return (
+          <div className="min-h-[50vh] flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-xs text-slate-400 mt-2 font-bold">Syncing admin databases...</span>
+          </div>
+        );
+      }
+
+      const barData = {
+        labels: ['Tab Switch', 'Mobile Device', 'Multi Faces', 'Headphones', 'Gaze Away'],
+        datasets: [{
+          label: 'Incidents Counts',
+          data: [15, 6, 8, 3, 21],
+          backgroundColor: [
+            'rgba(12, 133, 235, 0.75)',
+            'rgba(231, 76, 60, 0.75)',
+            'rgba(155, 89, 182, 0.75)',
+            'rgba(52, 152, 219, 0.75)',
+            'rgba(230, 126, 34, 0.75)'
+          ],
+          borderWidth: 0,
+          borderRadius: 8
+        }]
+      };
+
+      const barOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          y: { ticks: { font: { size: 9 } } },
+          x: { ticks: { font: { size: 9 } } }
+        }
+      };
+
+      return (
+        <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Administrator Console</h2>
+              <p className="text-xs text-slate-450 mt-0.5">Control live invigilation lobbies and question banks.</p>
+            </div>
+            <button onClick={() => setView('admin-live-monitor')} className="px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl text-xs font-bold animate-pulse flex items-center gap-1.5 shadow-md">
+              <Icons.Live className="w-3.5 h-3.5 text-white animate-spin-slow" /> Live Monitor Room
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+              <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Total Students</span>
+              <span className="text-2xl font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">{stats?.totalStudents || 0}</span>
+            </div>
+            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+              <span className="text-[10px] font-bold text-slate-450 uppercase tracking-wider block">Total Exams</span>
+              <span className="text-2xl font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">{stats?.totalTests || 0}</span>
+            </div>
+            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl shadow-sm hover:border-brand-200 transition-colors">
+              <span className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block">Exams Taken</span>
+              <span className="text-2xl font-extrabold text-slate-800 dark:text-slate-200 mt-1 block">{stats?.completedExams || 0}</span>
+            </div>
+            <div className="p-5 bg-white dark:bg-slate-900 border border-slate-200/50 dark:border-slate-800 rounded-2xl shadow-sm hover:border-red-200 transition-colors">
+              <span className="text-[10px] font-bold text-slate-455 uppercase tracking-wider block">Total Warnings</span>
+              <span className="text-2xl font-extrabold text-red-500 mt-1 block">{stats?.violationCount || 0}</span>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-7">
+              <div className="glassmorphism p-6 rounded-2xl shadow-sm">
+                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-4 flex items-center gap-2"><Icons.Book className="w-4 h-4 text-brand-500" /> Recent Candidate Submissions</h3>
+                {(!stats?.recentSubmissions || stats.recentSubmissions.length === 0) ? (
+                  <div className="py-12 text-center text-xs text-slate-400">No submissions recorded today.</div>
+                ) : (
+                  <div className="divide-y divide-slate-100 dark:divide-slate-850">
+                    {stats.recentSubmissions.map(sub => (
+                      <div key={sub._id} className="py-3.5 flex justify-between items-center">
+                        <div className="text-left">
+                          <span className="text-xs font-bold text-slate-800 dark:text-slate-200">{sub.student?.name}</span>
+                          <span className="block text-[9.5px] text-slate-400 mt-0.5">{sub.test?.title}</span>
+                        </div>
+                        <div className="text-right flex items-center gap-3">
+                          <div>
+                            <span className="text-xs font-extrabold text-slate-855 dark:text-slate-250 block">{sub.score} Marks ({sub.percentage}%)</span>
+                            <span className={`inline-block text-[8px] font-bold px-1.5 py-0.5 rounded uppercase mt-0.5 ${sub.status === 'pass' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{sub.status}</span>
+                          </div>
+                          <button onClick={() => { setSelectedResultId(sub._id); setView('result-details'); }} className="p-1.5 bg-slate-105 hover:bg-slate-200 rounded-xl transition-colors text-xs font-bold" title="View Transcript">👁️</button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-5 space-y-6">
+              <div className="glassmorphism p-5 rounded-2xl shadow-sm">
+                <h4 className="text-xs font-bold text-slate-800 dark:text-slate-205 uppercase tracking-widest mb-4 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4 text-brand-500" /> Integrity Incident Trends</h4>
+                <div className="h-44 relative">
+                  <BarChart data={barData} options={barOptions} />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 9. Manage Tests Page (Create Exam & Bulk Upload Parser)
+    const ManageTests = ({ setView }) => {
+      const [title, setTitle] = useState('');
+      const [description, setDescription] = useState('');
+      const [duration, setDuration] = useState(60);
+      const [passingMarks, setPassingMarks] = useState(5);
+      const [negativeMarks, setNegativeMarks] = useState(0.25);
+      const [startDate, setStartDate] = useState('');
+      const [endDate, setEndDate] = useState('');
+      const [maxAttempts, setMaxAttempts] = useState(1);
+      const [status, setStatus] = useState('published');
+      const [instructions, setInstructions] = useState(['Activate webcam.', 'Window sandboxed.']);
+      const [newRule, setNewRule] = useState('');
+      const [questions, setQuestions] = useState([]);
+      const [tab, setTab] = useState('settings');
+      
+      const [manualText, setManualText] = useState('');
+      const [manualOpts, setManualOpts] = useState(['', '', '', '']);
+      const [manualCorrect, setManualCorrect] = useState(0);
+      const [manualImageUrl, setManualImageUrl] = useState('');
+      const [manualCategory, setManualCategory] = useState('General');
+      
+      const [error, setError] = useState('');
+      const [success, setSuccess] = useState('');
+
+      const addRule = () => {
+        if (newRule.trim()) { setInstructions([...instructions, newRule.trim()]); setNewRule(''); }
+      };
+
+      const removeRule = (idx) => { setInstructions(instructions.filter((_, i) => i !== idx)); };
+
+      const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setError('');
+        setSuccess('');
+        try {
+          const res = await api.uploadFile('/uploads/questions', file);
+          if (res.success) {
+            setQuestions([...questions, ...res.data]);
+            setSuccess(`Successfully parsed ${res.count} questions from file.`);
+            setTab('questions');
+          } else {
+            setError(res.message);
+          }
+        } catch (e) {
+          setError('Question parser error. CSV/TXT must match expected layouts.');
+        }
+      };
+
+      const handleAddManual = (e) => {
+        e.preventDefault();
+        if (!manualText || manualOpts.some(o => !o.trim())) {
+          setError('Specify question text and all 4 options.'); return;
+        }
+        const q = {
+          text: manualText,
+          options: [...manualOpts],
+          correctAnswer: manualCorrect,
+          marks: 1,
+          subject: 'Biology',
+          difficulty: 'medium',
+          imageUrl: manualImageUrl,
+          category: manualCategory
+        };
+        setQuestions([...questions, q]);
+        setManualText('');
+        setManualOpts(['', '', '', '']);
+        setManualImageUrl('');
+        setManualCategory('General');
+        setSuccess('Manual question appended.');
+      };
+
+      const handleSave = async () => {
+        setError('');
+        if (!title || !startDate || !endDate || questions.length === 0) {
+          setError('Incomplete form: specify title, dates, and at least 1 question.'); return;
+        }
+        try {
+          const res = await api.post('/tests', {
+            title, description, duration, passingMarks, negativeMarks,
+            startDate: new Date(startDate), endDate: new Date(endDate),
+            instructions, maxAttempts, status, questions
+          });
+          if (res.success) {
+            setSuccess('Examination created successfully.');
+            setTimeout(() => { setView('admin-dashboard'); }, 1500);
+          }
+        } catch (err) {
+          setError('Failed to create examination.');
+        }
+      };
+
+      return (
+        <div className="max-w-5xl mx-auto px-6 py-8 text-left">
+          <div className="flex justify-between items-center mb-6">
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Create Exam Test</h2>
+              <p className="text-xs text-slate-450 mt-0.5">Configure exam options and specify question lists.</p>
+            </div>
+            <button onClick={handleSave} className="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5">
+              <Icons.Check className="w-3.5 h-3.5" /> Save Exam Test
+            </button>
+          </div>
+
+          {error && <div className="p-3 bg-red-50 text-red-650 text-xs font-bold rounded-xl mb-4 flex items-center gap-1"><Icons.Alert className="w-4 h-4" />{error}</div>}
+          {success && <div className="p-3 bg-green-50 text-green-700 text-xs font-bold rounded-xl mb-4 flex items-center gap-1"><Icons.Check className="w-4 h-4" />{success}</div>}
+
+          <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6">
+            <button onClick={() => setTab('settings')} className={`pb-3 text-xs font-bold border-b-2 px-4 ${tab === 'settings' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400'}`}>General Settings</button>
+            <button onClick={() => setTab('questions')} className={`pb-3 text-xs font-bold border-b-2 px-4 ${tab === 'questions' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400'}`}>Questions Matrix ({questions.length})</button>
+          </div>
+
+          {tab === 'settings' ? (
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+              <div className="lg:col-span-8 p-6 glassmorphism rounded-2xl space-y-4">
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500">Test Title</label>
+                  <input type="text" value={title} onChange={e => setTitle(e.target.value)} className="w-full bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1" placeholder="Cardiology Entrance Examination"/>
+                </div>
+                <div>
+                  <label className="block text-[10px] font-bold uppercase text-slate-500">Description</label>
+                  <textarea value={description} onChange={e => setDescription(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1" placeholder="Entrance test covering Cardiology basics..."/>
+                </div>
+                <div className="grid grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-550">Duration (min)</label>
+                    <input type="number" value={duration} onChange={e => setDuration(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 mt-1"/>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-550">Passing score</label>
+                    <input type="number" value={passingMarks} onChange={e => setPassingMarks(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 mt-1"/>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-550">Negative Mark</label>
+                    <input type="number" step="0.25" value={negativeMarks} onChange={e => setNegativeMarks(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 mt-1"/>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-500">Start Window</label>
+                    <input type="datetime-local" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 mt-1"/>
+                  </div>
+                  <div>
+                    <label className="block text-[10px] font-bold uppercase text-slate-555">End Window</label>
+                    <input type="datetime-local" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:ring-2 mt-1"/>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-4 p-6 glassmorphism rounded-2xl flex flex-col justify-between">
+                <div>
+                  <h4 className="text-[10px] font-bold uppercase text-slate-500 mb-3">Instructions Rules</h4>
+                  <div className="space-y-2 max-h-48 overflow-y-auto">
+                    {instructions.map((ins, i) => (
+                      <div key={i} className="flex justify-between items-center p-2.5 bg-slate-50 dark:bg-slate-900 border rounded-lg text-[10px]">
+                        <span>{i+1}. {ins}</span>
+                        <span onClick={() => removeRule(i)} className="text-red-500 cursor-pointer">🗑️</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-4">
+                  <input type="text" value={newRule} onChange={e => setNewRule(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-[10px]" placeholder="Add new rule..."/>
+                  <button onClick={addRule} className="px-3 bg-brand-500 text-white rounded-xl text-xs">+</button>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-6 border-2 border-dashed border-slate-355 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center">
+                  <Icons.Upload className="w-6 h-6 text-slate-400 mb-2" />
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-305">Bulk Import questions</h4>
+                  <p className="text-[9.5px] text-slate-400 text-center mt-1">Select CSV or TXT formatted template files.</p>
+                  <input type="file" id="bulk-file" className="hidden" onChange={handleFileUpload}/>
+                  <button onClick={() => document.getElementById('bulk-file').click()} className="mt-4 px-3 py-1.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold shadow-sm">Select Template</button>
+                </div>
+
+                <div className="p-6 glassmorphism rounded-2xl text-left border">
+                  <h4 className="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center gap-1.5"><Icons.Plus className="w-4 h-4 text-brand-500" /> Add Question Manually</h4>
+                  <div className="space-y-3">
+                    <input type="text" value={manualText} onChange={e => setManualText(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-[10px]" placeholder="Question text..."/>
+                    <div className="grid grid-cols-2 gap-2">
+                      {manualOpts.map((opt, i) => (
+                        <input key={i} type="text" value={opt} onChange={e => {
+                          const copy = [...manualOpts]; copy[i] = e.target.value; setManualOpts(copy);
+                        }} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-[9.5px]" placeholder={`Option ${String.fromCharCode(65+i)}`}/>
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <input type="text" value={manualImageUrl} onChange={e => setManualImageUrl(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-[9.5px]" placeholder="Question Image URL (Optional)"/>
+                      <input type="text" value={manualCategory} onChange={e => setManualCategory(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-3 text-[9.5px]" placeholder="Category (e.g. Image, Biology)"/>
+                    </div>
+                    <div className="flex gap-2">
+                      <select value={manualCorrect} onChange={e => setManualCorrect(parseInt(e.target.value))} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-1.5 px-2 text-[10px]">
+                        <option value={0}>Option A correct</option>
+                        <option value={1}>Option B correct</option>
+                        <option value={2}>Option C correct</option>
+                        <option value={3}>Option D correct</option>
+                      </select>
+                      <button onClick={handleAddManual} className="px-4 py-1.5 bg-brand-500 text-white rounded-xl text-[10px] font-bold shadow-sm">Add</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                {questions.map((q, idx) => (
+                  <div key={idx} className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl relative shadow-sm text-left">
+                    <button onClick={() => setQuestions(questions.filter((_, i) => i !== idx))} className="absolute top-4 right-4 text-red-500 text-xs">🗑️</button>
+                    <span className="text-[9px] font-bold text-slate-400 uppercase">Q #{idx+1}</span>
+                    <h5 className="text-xs font-bold text-slate-800 dark:text-slate-250 mt-1">{q.text}</h5>
+                    {q.imageUrl && (
+                      <div className="mt-2 rounded-xl overflow-hidden border max-w-xs bg-slate-50 dark:bg-slate-950">
+                        <img src={q.imageUrl} alt="Question Diagram" className="max-h-24 object-contain py-1 px-1"/>
+                      </div>
+                    )}
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {q.options.map((opt, oIdx) => (
+                        <div key={oIdx} className={`p-2 rounded-lg text-[10px] ${oIdx === q.correctAnswer ? 'bg-green-50 text-green-700 font-bold border border-green-200/20' : 'bg-slate-50 text-slate-400 dark:bg-slate-955 dark:border-slate-855 border'}`}>{opt}</div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // 10. Question Bank CRUD Manager Page
+    const QuestionBank = () => {
+      const [questions, setQuestions] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [search, setSearch] = useState('');
+      const [subject, setSubject] = useState('');
+      const [difficulty, setDifficulty] = useState('');
+
+      const loadQuestions = async () => {
+        setLoading(true);
+        try {
+          let url = '/questions';
+          const params = [];
+          if (subject) params.push(`subject=${subject}`);
+          if (difficulty) params.push(`difficulty=${difficulty}`);
+          if (search) params.push(`search=${search}`);
+          if (params.length > 0) url += `?${params.join('&')}`;
+
+          const res = await api.get(url);
+          if (res.success) setQuestions(res.data);
+        } catch (e) {
+          console.error(e);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      useEffect(() => { loadQuestions(); }, [subject, difficulty]);
+
+      const handleSearchSubmit = (e) => {
+        e.preventDefault();
+        loadQuestions();
+      };
+
+      const handleDelete = async (id) => {
+        if (window.confirm('Delete this question from database?')) {
+          try {
+            const res = await api.delete(`/questions/${id}`);
+            if (res.success) setQuestions(prev => prev.filter(q => q._id !== id));
+          } catch (e) {
+            alert('Deletion failed.');
+          }
+        }
+      };
+
+      return (
+        <div className="max-w-5xl mx-auto px-6 py-8 text-left font-sans">
+          <div className="mb-6">
+            <h2 className="text-2xl font-extrabold text-slate-805 dark:text-slate-100">Question Bank Catalog</h2>
+            <p className="text-xs text-slate-450 mt-0.5">Maintain, search, and delete general exam questions.</p>
+          </div>
+
+          <div className="p-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-850 rounded-2xl flex flex-col md:flex-row gap-4 justify-between items-center mb-6 shadow-sm">
+            <form onSubmit={handleSearchSubmit} className="relative w-full md:w-80">
+              <input type="text" placeholder="Search keywords..." value={search} onChange={e => setSearch(e.target.value)} className="w-full bg-slate-50 dark:bg-slate-950 border border-slate-200 dark:border-slate-800 rounded-xl py-2 pl-9 pr-4 text-xs outline-none focus:ring-2 focus:ring-brand-500 dark:text-slate-100"/>
+              <Icons.Search className="absolute left-3 top-2.5 text-slate-400 w-4 h-4" />
+            </form>
+
+            <div className="flex gap-4 w-full md:w-auto">
+              <select value={subject} onChange={e => setSubject(e.target.value)} className="bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2 px-3 text-xs focus:outline-none dark:text-slate-100">
+                <option value="">All Subjects</option>
+                <option value="Biology">Biology</option>
+                <option value="Chemistry">Chemistry</option>
+                <option value="Physics">Physics</option>
+                <option value="General">General</option>
+              </select>
+
+              <select value={difficulty} onChange={e => setDifficulty(e.target.value)} className="bg-slate-50 dark:bg-slate-955 border border-slate-200 dark:border-slate-805 rounded-xl py-2 px-3 text-xs focus:outline-none dark:text-slate-100">
+                <option value="">All Difficulties</option>
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
+              </select>
+            </div>
+          </div>
+
+          {loading ? <div className="py-12 text-center text-xs text-slate-400">Loading catalog...</div> : (
+            <div className="space-y-4">
+              {questions.map((q, i) => (
+                <div key={q._id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl relative shadow-sm hover:border-slate-350 transition-colors">
+                  <button onClick={() => handleDelete(q._id)} className="absolute top-4 right-4 text-red-500 text-xs font-bold flex items-center gap-1">
+                    <Icons.Trash className="w-3.5 h-3.5 text-red-500" /> Delete
+                  </button>
+                  <div className="flex gap-2 mb-2">
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-brand-50 text-brand-700 rounded uppercase border">{q.subject}</span>
+                    <span className="text-[8px] font-bold px-1.5 py-0.5 bg-tealbrand-50 text-tealbrand-700 rounded uppercase border">{q.difficulty}</span>
+                    {q.category && <span className="text-[8px] font-bold px-1.5 py-0.5 bg-yellow-50 text-yellow-700 rounded uppercase border">{q.category}</span>}
+                  </div>
+                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-250 max-w-[85%]">{q.text}</h4>
+                  {q.imageUrl && (
+                    <div className="mt-3 rounded-xl overflow-hidden border max-w-xs bg-slate-50 dark:bg-slate-955">
+                      <img src={q.imageUrl} alt="Question diagram preview" className="max-h-32 object-contain py-1 px-1"/>
+                    </div>
+                  )}
+                  <div className="grid grid-cols-2 gap-2 mt-3">
+                    {q.options.map((opt, oIdx) => (
+                      <div key={oIdx} className={`p-2 rounded-xl text-[10px] ${oIdx === q.correctAnswer ? 'bg-green-50 text-green-700 font-bold border border-green-200/20' : 'bg-slate-50 text-slate-450 border border-slate-100 dark:border-slate-850'}`}>{opt}</div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // 11. Exam Setup Page
+    const ExamSetup = ({ testId, setView, setSelectedActiveSessionId }) => {
+      const [test, setTest] = useState(null);
+      const [loading, setLoading] = useState(true);
+      const [camChecked, setCamChecked] = useState(false);
+      const [fullscreenChecked, setFullscreenChecked] = useState(false);
+      const [scanPassed, setScanPassed] = useState(false);
+      const [scanning, setScanning] = useState(false);
+      const [error, setError] = useState('');
+      
+      const videoRef = useRef(null);
+      const streamRef = useRef(null);
+      const canvasRef = useRef(null);
+
+      useEffect(() => {
+        api.get(`/tests/${testId}`).then(res => {
+          if (res.success) setTest(res.data);
+          setLoading(false);
+        });
+        return () => {
+          if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+        };
+      }, [testId]);
+
+      useEffect(() => {
+        let drawInterval;
+        if (camChecked && videoRef.current && canvasRef.current) {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          
+          drawInterval = setInterval(() => {
+            if (video.readyState === 4) {
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              
+              if (scanning) {
+                ctx.strokeStyle = '#2dd4bf';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = 'rgba(45, 212, 191, 0.1)';
+                ctx.fillRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = '#2dd4bf';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('SCANNING LANDMARKS...', canvas.width*0.3, canvas.height*0.5);
+              } else if (scanPassed) {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('MATCH CONFIRMED', canvas.width*0.33, canvas.height*0.5);
+              }
+            }
+          }, 60);
+        }
+        return () => clearInterval(drawInterval);
+      }, [camChecked, scanning, scanPassed]);
+
+      const grantHardware = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+          streamRef.current = stream;
+          if (videoRef.current) videoRef.current.srcObject = stream;
+          setCamChecked(true);
+        } catch (e) {
+          setError('Camera / Mic permissions are mandatory for proctored examinations.');
+        }
+      };
+
+      const lockFullscreen = () => {
+        const docEl = document.documentElement;
+        if (docEl.requestFullscreen) docEl.requestFullscreen();
+        setFullscreenChecked(true);
+      };
+
+      const runBiometricScan = () => {
+        if (!camChecked) { setError('Grant webcam access first.'); return; }
+        setScanning(true);
+        setError('');
+        setTimeout(() => {
+          setScanning(false);
+          setScanPassed(true);
+        }, 2000);
+      };
+
+      const handleLaunch = async () => {
+        if (!camChecked || !fullscreenChecked || !scanPassed) {
+          setError('Confirm all entry prerequisites before starting.'); return;
+        }
+        try {
+          const res = await api.post('/exams/start', { testId });
+          if (res.success) {
+            if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+            setSelectedActiveSessionId(res.data._id);
+            setView('student-exam-portal');
+          } else {
+            setError(res.message);
+          }
+        } catch (e) {
+          setError('Exam launch session failed.');
+        }
+      };
+
+      if (loading) {
+        return <div className="py-20 text-center text-xs text-slate-400">Configuring hardware channels...</div>;
+      }
+
+      return (
+        <div className="max-w-4xl mx-auto px-6 py-8 text-left font-sans">
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Secure Pre-Exam Setup</h2>
+          <p className="text-xs text-slate-505 mt-1">Module: <strong>{test?.title}</strong> • Limit: {test?.duration} mins</p>
+          
+          {error && <div className="p-3 bg-red-50 text-red-655 text-xs font-bold rounded-xl my-4 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4 text-red-650" /> {error}</div>}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
+            <div className="space-y-4">
+              <div className="bg-slate-900 aspect-video rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-800 shadow-lg scanning-grid">
+                {camChecked ? (
+                  <>
+                    <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100 absolute inset-0"/>
+                    <canvas ref={canvasRef} className="w-full h-full object-cover transform -scale-x-100 absolute inset-0 z-10"/>
+                    {scanning && <div className="scan-laser"></div>}
+                  </>
+                ) : (
+                  <div className="text-slate-505 text-[10px] font-bold flex flex-col items-center gap-1">
+                    <Icons.Camera className="w-8 h-8 text-slate-650 animate-pulse" />
+                    <span>Camera preview offline</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="p-6 glassmorphism rounded-2xl flex flex-col justify-between border">
+              <div className="space-y-4 text-xs font-bold text-slate-655 dark:text-slate-350">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-455 border-b pb-2">Entry Prerequisites</h4>
+                <div className="flex justify-between items-center py-1">
+                  <span>1. Webcam & Mic Access</span>
+                  {camChecked ? <span className="text-green-500 text-[10px] font-bold">READY</span> : <button onClick={grantHardware} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Grant</button>}
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>2. Secure Fullscreen Lock</span>
+                  {fullscreenChecked ? <span className="text-green-500 text-[10px] font-bold">LOCKED</span> : <button onClick={lockFullscreen} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Lock</button>}
+                </div>
+                <div className="flex justify-between items-center py-1">
+                  <span>3. Face Profile Match</span>
+                  {scanPassed ? <span className="text-green-500 text-[10px] font-bold">CONFIRMED</span> : <button onClick={runBiometricScan} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Scan</button>}
+                </div>
+              </div>
+
+              <button onClick={handleLaunch} className="w-full mt-6 py-2.5 bg-tealbrand-600 hover:bg-tealbrand-700 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+                Launch Secure Attempt
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 12. Exam Attempt Portal (Continuous AI Proctoring Loop)
+    const ExamPortal = ({ sessionId, setView, setSelectedResultId }) => {
+      const { user } = useContext(AuthContext);
+      const [questions, setQuestions] = useState([]);
+      const [currentIdx, setCurrentIdx] = useState(0);
+      const [answers, setAnswers] = useState({});
+      const [warningCount, setWarningCount] = useState(0);
+      
+      const [timeLeft, setTimeLeft] = useState(0);
+      const [showWarningModal, setShowWarningModal] = useState(false);
+      const [warningReason, setWarningReason] = useState('');
+      const [disqualifiedReason, setDisqualifiedReason] = useState('');
+      
+      const [aiLogs, setAiLogs] = useState(['[SYSTEM] Initializing AI proctor core...', '[SYSTEM] Waiting for video buffer...']);
+      const [aiStatus, setAiStatus] = useState('CALIBRATING');
+
+      const videoRef = useRef(null);
+      const streamRef = useRef(null);
+      const socketRef = useRef(null);
+      const canvasRef = useRef(null);
+      const overlayCanvasRef = useRef(null);
+      const proctorInterval = useRef(null);
+      const logScrollRef = useRef(null);
+
+      const addAiLog = (msg) => {
+        const time = new Date().toLocaleTimeString();
+        setAiLogs(prev => [...prev, `[${time}] ${msg}`].slice(-40));
+      };
+
+      useEffect(() => {
+        if (logScrollRef.current) {
+          logScrollRef.current.scrollTop = logScrollRef.current.scrollHeight;
+        }
+      }, [aiLogs]);
+
+      useEffect(() => {
+        const init = async () => {
+          try {
+            const sessRes = await api.get(`/exams/session/${sessionId}`);
+            if (sessRes.success) {
+              setWarningCount(sessRes.data.warningCount);
+              const loaded = {};
+              if (sessRes.data.answers) {
+                Object.entries(sessRes.data.answers).forEach(([k,v]) => { loaded[k] = v; });
+              }
+              setAnswers(loaded);
+
+              const testRes = await api.get(`/tests/${sessRes.data.test._id}`);
+              if (testRes.success) {
+                setQuestions(testRes.data.questions);
+                const elapsed = Math.floor((Date.now() - new Date(sessRes.data.startTime).getTime()) / 1000);
+                const remaining = (testRes.data.duration * 60) - elapsed;
+                if (remaining <= 0) handleAutoSubmit();
+                else setTimeLeft(remaining);
+              }
+            }
+          } catch (e) { console.error(e); }
+        };
+        init();
+
+        return () => {
+          if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+          if (socketRef.current) socketRef.current.disconnect();
+          if (proctorInterval.current) clearInterval(proctorInterval.current);
+        };
+      }, [sessionId]);
+
+      useEffect(() => {
+        if (user && timeLeft > 0) {
+          socketRef.current = io('http://localhost:5000');
+          socketRef.current.emit('join-exam', { sessionId, studentName: user.name, testTitle: 'Qualifying Exam' });
+          
+          startVideoFeed();
+          initProctorAi();
+        }
+      }, [timeLeft]);
+
+      // Browser Security Constraints
+      useEffect(() => {
+        if (timeLeft <= 0) return;
+
+        const onTabSwitch = () => { if (document.hidden) { handleViolation('tab-switch'); addAiLog('ALERT: Focus lost! Tab switch event logged.'); } };
+        const onBlur = () => { handleViolation('tab-switch'); addAiLog('ALERT: Focus lost! Focus transfer event logged.'); };
+        const onFullscreenChange = () => { if (!document.fullscreenElement) { handleViolation('fullscreen-exit'); addAiLog('ALERT: Fullscreen boundary exited.'); } };
+        const onKeyDown = (e) => {
+          if (e.key === 'F5' || (e.ctrlKey && e.key === 'r') || e.key === 'F12' || (e.ctrlKey && e.key === 'c') || (e.ctrlKey && e.key === 'v')) {
+            e.preventDefault(); handleViolation('security-block');
+            addAiLog(`ALERT: Prohibited keystroke key="${e.key}" blocked.`);
+          }
+        };
+        const onRightClick = (e) => { e.preventDefault(); handleViolation('right-click'); addAiLog('ALERT: Context menu right click blocked.'); };
+        const onCopyPaste = (e) => { e.preventDefault(); handleViolation('copy-paste'); addAiLog('ALERT: Clipboard action blocked.'); };
+
+        document.addEventListener('visibilitychange', onTabSwitch);
+        window.addEventListener('blur', onBlur);
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        window.addEventListener('keydown', onKeyDown);
+        window.addEventListener('contextmenu', onRightClick);
+        document.addEventListener('copy', onCopyPaste);
+        document.addEventListener('paste', onCopyPaste);
+
+        return () => {
+          document.removeEventListener('visibilitychange', onTabSwitch);
+          window.removeEventListener('blur', onBlur);
+          document.removeEventListener('fullscreenchange', onFullscreenChange);
+          window.removeEventListener('keydown', onKeyDown);
+          window.removeEventListener('contextmenu', onRightClick);
+          document.removeEventListener('copy', onCopyPaste);
+          document.removeEventListener('paste', onCopyPaste);
+        };
+      }, [timeLeft]);
+
+      useEffect(() => {
+        if (timeLeft <= 0) return;
+        const clock = setInterval(() => {
+          setTimeLeft(prev => {
+            if (prev <= 1) { clearInterval(clock); handleAutoSubmit(); return 0; }
+            return prev - 1;
+          });
+        }, 1000);
+        return () => clearInterval(clock);
+      }, [timeLeft]);
+
+      const startVideoFeed = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+          streamRef.current = stream;
+          if (videoRef.current) videoRef.current.srcObject = stream;
+          addAiLog('SYSTEM: Camera stream synchronized.');
+        } catch (e) {
+          handleViolation('camera-disabled');
+        }
+      };
+
+      const initProctorAi = async () => {
+        try {
+          if (window.cocoSsd) {
+            setAiStatus('SECURED');
+            addAiLog('AI-ENGINE: Loaded COCO-SSD weights. Tracking active.');
+            
+            proctorInterval.current = setInterval(async () => {
+              if (videoRef.current && videoRef.current.readyState === 4 && overlayCanvasRef.current) {
+                const video = videoRef.current;
+                const canvas = overlayCanvasRef.current;
+                const ctx = canvas.getContext('2d');
+                
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+                const predictions = await window.cocoSsd.load().then(model => model.detect(video));
+                let persons = 0; let phone = false; let book = false;
+                
+                predictions.forEach(p => {
+                  if (p.class === 'person') persons++;
+                  if (p.class === 'cell phone') phone = true;
+                  if (p.class === 'book') book = true;
+
+                  const [x, y, w, h] = p.bbox;
+                  const isViolation = p.class === 'cell phone';
+                  
+                  ctx.strokeStyle = isViolation ? '#ef4444' : '#10b981';
+                  ctx.lineWidth = 3;
+                  ctx.strokeRect(x, y, w, h);
+                  
+                  ctx.fillStyle = isViolation ? '#ef4444' : '#10b981';
+                  ctx.font = 'bold 12px monospace';
+                  ctx.fillText(`${p.class.toUpperCase()} [${Math.round(p.score * 100)}%]`, x + 5, y + 18);
+                });
+
+                if (phone) {
+                  handleViolation('mobile-detected');
+                  setAiStatus('WARNING');
+                  addAiLog('ALERT: Prohibited cell phone detected in video telemetry.');
+                } else if (persons > 1) {
+                  handleViolation('multiple-faces');
+                  setAiStatus('WARNING');
+                  addAiLog('ALERT: Multiple face structures detected.');
+                } else if (persons === 0) {
+                  handleViolation('no-face');
+                  setAiStatus('WARNING');
+                  addAiLog('ALERT: Candidate face missing from webcam field.');
+                } else if (book) {
+                  handleViolation('book-detected');
+                  setAiStatus('WARNING');
+                  addAiLog('ALERT: Unauthorized reading material detected.');
+                } else {
+                  setAiStatus('SECURED');
+                  addAiLog(`AI: Scan OK. Candidate centered. 0 irregular devices.`);
+                }
+              }
+            }, 2000);
+          }
+        } catch (e) { console.error('AI init fail', e); }
+      };
+
+      const captureFrame = () => {
+        if (videoRef.current && canvasRef.current) {
+          const canvas = canvasRef.current; const video = videoRef.current;
+          canvas.width = 320; canvas.height = 240;
+          const ctx = canvas.getContext('2d');
+          ctx.translate(320, 0); ctx.scale(-1, 1);
+          ctx.drawImage(video, 0, 0, 320, 240);
+          return canvas.toDataURL('image/jpeg', 0.6);
+        }
+        return '';
+      };
+
+      const handleViolation = async (type) => {
+        if (disqualifiedReason) return;
+        const screenshot = captureFrame();
+        try {
+          const res = await api.post('/exams/violation', { sessionId, violationType: type, screenshot });
+          if (res.success) {
+            setWarningCount(res.warningCount);
+            if (socketRef.current && user) {
+              socketRef.current.emit('student-violation', { sessionId, studentName: user.name, testTitle: 'Qualifying Exam', violationType: type, warningCount: res.warningCount, screenshotUrl: screenshot });
+            }
+            if (res.disqualified) {
+              setDisqualifiedReason(res.message);
+              if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
+            } else {
+              setWarningReason(getWarningLabel(type));
+              setShowWarningModal(true);
+            }
+          }
+        } catch (e) { console.error(e); }
+      };
+
+      const getWarningLabel = (type) => {
+        if (type === 'tab-switch') return 'WARNING: DO NOT SWITCH TABS. Exam constraints log tab transfers.';
+        if (type === 'fullscreen-exit') return 'WARNING: Go back to full screen immediately.';
+        if (type === 'mobile-detected') return 'PROHIBITED DEVICE: Mobile phone detected in webcam view.';
+        if (type === 'multiple-faces') return 'PROCTOR ALARM: Multiple face outlines detected.';
+        if (type === 'no-face') return 'PROCTOR ALARM: Candidate face missing from stream.';
+        return 'WARNING: Security irregular activity logged.';
+      };
+
+      const selectOption = async (oIdx) => {
+        const q = questions[currentIdx];
+        const prev = answers[q._id];
+        const val = prev === oIdx ? -1 : oIdx;
+        const copy = { ...answers };
+        if (val === -1) delete copy[q._id];
+        else copy[q._id] = val;
+        setAnswers(copy);
+
+        api.post('/exams/save-answer', { sessionId, questionId: q._id, selectedOptionIndex: val });
+        addAiLog(`STUDENT: Answered Q #${currentIdx+1} option ${String.fromCharCode(65+oIdx)}.`);
+      };
+
+      const handleAutoSubmit = async () => {
+        try {
+          const res = await api.post('/exams/submit', { sessionId });
+          if (res.success) {
+            setSelectedResultId(res.data._id);
+            setView('result-details');
+          }
+        } catch (e) { setView('student-dashboard'); }
+      };
+
+      const handleManualSubmit = () => {
+        if (window.confirm('Submit examination answers?')) handleAutoSubmit();
+      };
+
+      if (disqualifiedReason) {
+        return (
+          <div className="fixed inset-0 z-50 bg-slate-955 flex items-center justify-center text-center px-6">
+            <div className="w-full max-w-sm bg-slate-900 border border-red-955 p-6 rounded-2xl">
+              <span className="text-3xl block">🚨</span>
+              <h3 className="text-white text-base font-bold mt-2 font-sans">Attempt Terminated</h3>
+              <p className="text-[10px] text-red-400 mt-2 font-bold leading-normal">{disqualifiedReason}</p>
+              <button onClick={() => setView('student-dashboard')} className="w-full mt-6 py-2 bg-red-650 text-white rounded-lg text-xs font-bold shadow-md">Return to Dashboard</button>
+            </div>
+          </div>
+        );
+      }
+
+      const q = questions[currentIdx];
+      const m = Math.floor(timeLeft / 60); const s = timeLeft % 60;
+
+      return (
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col select-none relative">
+          <canvas ref={canvasRef} className="hidden"/>
+          <header className="glassmorphism px-6 py-3 flex justify-between items-center relative z-25 border-b">
+            <div className="text-left"><h1 className="text-xs font-extrabold text-slate-800 dark:text-slate-202 font-sans">Exam Attempt Portal</h1></div>
+            <div className="flex gap-4 items-center">
+              <div className="px-3.5 py-2 bg-slate-100 dark:bg-slate-900 text-[11px] font-extrabold rounded-xl border flex items-center gap-1"><Icons.Clock className="w-3.5 h-3.5 text-brand-500" /> Time: {m}:{s < 10 ? '0'+s : s}</div>
+              <button onClick={handleManualSubmit} className="px-4 py-2 bg-red-650 hover:bg-red-700 text-white rounded-xl text-xs font-extrabold shadow-sm">Submit Exam</button>
+            </div>
+          </header>
+
+          <div className="flex-1 grid grid-cols-1 lg:grid-cols-12 gap-6 p-6 overflow-y-auto">
+            <div className="lg:col-span-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 p-6 rounded-2xl flex flex-col justify-between text-left shadow-sm">
+              {q ? (
+                <div>
+                  <div className="flex justify-between border-b pb-3 mb-4 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
+                    <span>Question {currentIdx+1} of {questions.length}</span>
+                    <span>Marks: {q.marks}</span>
+                  </div>
+                  
+                  {/* Category badge */}
+                  {q.category && (
+                    <span className="inline-block text-[8px] font-bold px-2 py-0.5 bg-yellow-50 text-yellow-700 dark:bg-yellow-950/20 dark:text-yellow-400 border border-yellow-250/20 rounded uppercase mb-2">Category: {q.category}</span>
+                  )}
+                  
+                  <h3 className="text-sm sm:text-base font-extrabold text-slate-800 dark:text-slate-150 leading-relaxed mb-6 font-sans">{q.text}</h3>
+                  
+                  {/* Render Question Diagram Image if present */}
+                  {q.imageUrl && (
+                    <div className="mb-6 rounded-2xl overflow-hidden border max-h-64 flex justify-center bg-slate-50 dark:bg-slate-950">
+                      <img src={q.imageUrl} alt="Question diagram" className="max-h-64 object-contain py-2 px-2"/>
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 gap-3.5">
+                    {q.options.map((opt, i) => {
+                      const isSel = answers[q._id] === i;
+                      return (
+                        <button key={i} onClick={() => selectOption(i)} className={`w-full p-4 rounded-xl border text-xs font-bold text-left flex items-center gap-3.5 transition-all ${isSel ? 'bg-brand-500 text-white border-brand-500 shadow-md translate-x-0.5' : 'bg-slate-50 hover:bg-slate-100 dark:bg-slate-950 border-slate-200 dark:border-slate-850'}`}>
+                          <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${isSel ? 'bg-white text-brand-600' : 'bg-white border text-slate-500'}`}>{String.fromCharCode(65+i)}</span>
+                          <span>{opt}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              ) : <div className="text-center text-xs text-slate-400">Loading modules...</div>}
+
+              <div className="flex justify-between mt-6 border-t pt-4">
+                <button onClick={() => setCurrentIdx(p => Math.max(0, p-1))} disabled={currentIdx === 0} className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 dark:bg-slate-800 dark:text-slate-355 dark:hover:bg-slate-750 rounded-xl text-xs font-bold disabled:opacity-40 flex items-center gap-1.5">
+                  <Icons.ChevronLeft className="w-3.5 h-3.5" /> Previous Question
+                </button>
+                {currentIdx === questions.length - 1 ? (
+                  <button onClick={handleManualSubmit} className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                    Submit Exam <Icons.Check className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  <button onClick={() => setCurrentIdx(p => p + 1)} className="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                    Next Question <Icons.ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="lg:col-span-4 space-y-6 text-left">
+              <div className="p-4 bg-slate-900 rounded-2xl relative border border-slate-800 text-center shadow-lg scanning-grid overflow-hidden">
+                <div className="absolute top-3 left-3 z-20 flex items-center gap-1.5">
+                  <span className="bg-red-600 text-white text-[8px] font-bold px-2 py-0.5 rounded tracking-widest flex items-center gap-0.5 animate-pulse">PROCTOR FEED 🔴</span>
+                  <span className={`text-[8.5px] font-extrabold px-1.5 py-0.5 rounded uppercase tracking-wider border shadow-sm ${aiStatus === 'SECURED' ? 'bg-green-500/20 text-green-400 border-green-500/40' : 'bg-yellow-500/20 text-yellow-400 border-yellow-500/40'}`}>
+                    AI: {aiStatus}
+                  </span>
+                </div>
+                <video ref={videoRef} autoPlay muted className="w-full aspect-video bg-black rounded-xl object-cover transform -scale-x-100 border border-slate-800 mt-4 z-0"/>
+                <canvas ref={overlayCanvasRef} className="w-full aspect-video rounded-xl object-cover transform -scale-x-100 absolute top-4 left-4 z-10"/>
+                <div className="flex justify-between items-center text-[10px] text-slate-400 font-bold mt-3">
+                  <span>Warnings Logged:</span>
+                  <span className="text-red-500 font-extrabold text-xs">{warningCount} / 5</span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-black border border-slate-850 rounded-2xl shadow-inner flex flex-col justify-between h-44">
+                <span className="text-[8px] font-bold text-slate-450 tracking-widest uppercase mb-1.5 flex items-center gap-1">📋 AI diagnostic telemetry</span>
+                <div ref={logScrollRef} className="flex-1 overflow-y-auto space-y-1 text-[9px] font-mono text-green-400 text-left select-text leading-relaxed">
+                  {aiLogs.map((log, index) => (
+                    <div key={index} className="truncate">{log}</div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="p-4 glassmorphism rounded-2xl border">
+                <h4 className="text-[10px] font-bold uppercase tracking-wider text-slate-455 mb-3 flex items-center gap-1"><Icons.Dashboard className="w-3.5 h-3.5" /> Navigation map</h4>
+                <div className="grid grid-cols-5 gap-2 max-h-48 overflow-y-auto">
+                  {questions.map((item, idx) => {
+                    const active = currentIdx === idx;
+                    const isAns = answers[item._id] !== undefined;
+                    return (
+                      <button key={idx} onClick={() => setCurrentIdx(idx)} className={`w-8.5 h-8.5 rounded-xl text-[10px] border font-bold flex items-center justify-center transition-all ${active ? 'ring-2 ring-brand-500 ring-offset-2 dark:ring-offset-slate-955' : ''} ${isAns ? 'bg-green-500 border-green-500 text-white' : 'bg-white dark:bg-slate-950 border-slate-200 dark:border-slate-855'}`}>{idx+1}</button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {showWarningModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-955/65 backdrop-blur-xs px-6">
+              <div className="w-full max-w-sm bg-white dark:bg-slate-900 border border-yellow-500 p-6 rounded-2xl text-center warning-pulse shadow-2xl">
+                <span className="text-3xl block">⚠️</span>
+                <h3 className="text-slate-800 dark:text-slate-100 font-extrabold mt-2 text-xs uppercase tracking-widest font-sans">Proctor Integrity Warning</h3>
+                <p className="text-[10px] text-red-500 mt-2.5 font-bold leading-normal">{warningReason}</p>
+                <p className="text-[9.5px] text-slate-400 mt-2.5">Current warnings tally: {warningCount} of 5. Exceeding 5 warnings terminates exam attempt.</p>
+                <button onClick={() => setShowWarningModal(false)} className="mt-5 w-full py-2.5 bg-yellow-500 hover:bg-yellow-600 text-white rounded-xl text-xs font-bold transition-all shadow">Resume Attempt</button>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    // 13. Result Details Page (Verifiable PDF download screen)
+    const ResultDetails = ({ resultId, setView }) => {
+      const [result, setResult] = useState(null);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        api.get(`/results/${resultId}`).then(res => {
+          if (res.success) setResult(res.data);
+          setLoading(false);
+        });
+      }, [resultId]);
+
+      const handleDownloadPdf = () => {
+        const token = localStorage.getItem('token');
+        window.open(`${API_BASE}/results/${resultId}/pdf?token=${token}`, '_blank');
+      };
+
+      if (loading) {
+        return <div className="py-20 text-center text-xs text-slate-400">Syncing scorecard file...</div>;
+      }
+
+      const isPass = result?.status === 'pass';
+
+      return (
+        <div className="max-w-3xl mx-auto px-6 py-8 text-left font-sans">
+          <span onClick={() => setView(result?.student?.role === 'admin' ? 'admin-dashboard' : 'student-dashboard')} className="text-xs text-slate-455 hover:text-slate-700 cursor-pointer mb-4 inline-flex items-center gap-1 font-bold">
+            <Icons.ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
+          </span>
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Scorecard Details</h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-12 gap-8 mt-6">
+            <div className="md:col-span-7 space-y-6">
+              <div className={`p-6 border rounded-2xl text-center shadow-sm ${isPass ? 'bg-green-50 text-green-700 font-bold border-green-200/25' : 'bg-red-50 text-red-700 font-bold border-red-200/25'}`}>
+                <span className="text-[10px] font-bold uppercase tracking-wider block">Status</span>
+                <h3 className="text-3xl font-extrabold mt-1 tracking-tight font-sans">{isPass ? 'PASSED 🎓' : 'FAILED ❌'}</h3>
+              </div>
+
+              <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3.5 shadow-sm">
+                <h4 className="text-[10px] font-bold text-slate-450 uppercase pb-2 border-b">Marks secured</h4>
+                <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
+                  <span>Qualifying Score:</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result.score} / {result.totalMarksPossible} Marks</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
+                  <span>Percentage:</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result.percentage}%</span>
+                </div>
+                <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5">
+                  <span>Attempt Date:</span>
+                  <span className="text-slate-855 dark:text-slate-150">{new Date(result.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="md:col-span-5 p-5 glassmorphism rounded-2xl flex flex-col justify-between border">
+              <div>
+                <h4 className="text-[10px] font-bold text-slate-400 uppercase pb-2 border-b">Proctoring report</h4>
+                <div className="space-y-2.5 mt-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
+                  <div className="flex justify-between"><span>Warnings registered:</span><span className="text-slate-855 dark:text-slate-250 font-extrabold">{result.violationReport?.violations?.length || 0} warnings</span></div>
+                </div>
+              </div>
+              <button onClick={handleDownloadPdf} className="w-full mt-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold flex justify-center items-center gap-1.5 shadow-md">
+                <Icons.Download className="w-4 h-4 text-white" /> Download PDF Certificate
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // 14. Live Monitoring Invigilator Lobby Page
+    const LiveMonitor = () => {
+      const [feeds, setFeeds] = useState({});
+      const [alerts, setAlerts] = useState([]);
+      const socketRef = useRef(null);
+
+      useEffect(() => {
+        socketRef.current = io('http://localhost:5000');
+        socketRef.current.emit('join-admin-lobby');
+
+        socketRef.current.on('student-entered', (data) => {
+          setFeeds(prev => ({
+            ...prev,
+            [data.sessionId]: { sessionId: data.sessionId, studentName: data.studentName, testTitle: data.testTitle, warningCount: 0, currentQuestionIndex: 0, timeLeft: 'Calculating...', online: true }
+          }));
+        });
+
+        socketRef.current.on('proctor-update', (data) => {
+          setFeeds(prev => ({
+            ...prev,
+            [data.sessionId]: { ...prev[data.sessionId], ...data, online: true }
+          }));
+        });
+
+        socketRef.current.on('proctor-alert', (data) => {
+          const alertItem = { id: Date.now(), ...data };
+          setAlerts(prev => [alertItem, ...prev].slice(0, 8));
+
+          setFeeds(prev => ({
+            ...prev,
+            [data.sessionId]: { ...prev[data.sessionId], warningCount: data.warningCount, latestViolation: data.violationType }
+          }));
+        });
+
+        return () => { if (socketRef.current) socketRef.current.disconnect(); };
+      }, []);
+
+      const feedList = Object.values(feeds);
+
+      return (
+        <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans">
+          <div className="flex items-center gap-3 mb-6">
+            <span className="text-2xl text-red-500 animate-pulse">📡</span>
+            <div>
+              <h2 className="text-2xl font-extrabold text-slate-805 dark:text-slate-100">Live invigilator feeds Lobby</h2>
+              <p className="text-xs text-slate-400 mt-0.5">WebSocket channel status: active • Active exam takers: {feedList.length}</p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            <div className="lg:col-span-8">
+              <h3 className="text-xs font-bold text-slate-455 uppercase mb-4 tracking-wider">Candidate Feeds</h3>
+              {feedList.length === 0 ? <div className="p-12 text-center text-xs text-slate-455 glassmorphism rounded-2xl border border-dashed">Invigilator lobbies are currently silent. Open student exam portals to start streaming.</div> : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {feedList.map(f => (
+                    <div key={f.sessionId} className={`p-5 bg-white dark:bg-slate-900 border rounded-2xl shadow-sm hover:border-brand-200 transition-all ${f.warningCount > 3 ? 'border-red-500 animate-pulse' : 'border-slate-200 dark:border-slate-800/80'}`}>
+                      <h4 className="text-xs font-extrabold text-slate-855 dark:text-slate-200">{f.studentName}</h4>
+                      <span className="text-[9.5px] text-slate-400 mt-0.5 block">{f.testTitle}</span>
+                      <div className="grid grid-cols-2 gap-2 mt-4 text-[9.5px] text-slate-505 font-bold border-t pt-3">
+                        <div>Progress: <span className="block text-slate-855 dark:text-slate-200 mt-0.5 font-bold">Q #{f.currentQuestionIndex+1}</span></div>
+                        <div>Time left: <span className="block text-slate-855 dark:text-slate-200 mt-0.5 font-bold">{isNaN(f.timeLeft) ? f.timeLeft : Math.floor(f.timeLeft/60) + ' min'}</span></div>
+                      </div>
+                      <div className="mt-4 flex justify-between items-center text-[10px] font-bold text-slate-500">
+                        <span>Warnings issued:</span>
+                        <span className="text-red-500 font-extrabold">{f.warningCount} / 5</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="lg:col-span-4 space-y-4">
+              <h3 className="text-xs font-bold text-slate-455 uppercase tracking-wider">Flashing integrity alerts</h3>
+              <div className="p-4 glassmorphism rounded-2xl max-h-[50vh] overflow-y-auto space-y-3 border">
+                {alerts.length === 0 ? <div className="text-center py-12 text-[10px] text-slate-400">Zero active proctor alarms recorded.</div> : (
+                  alerts.map(a => (
+                    <div key={a.id} className="p-3 bg-red-50/50 dark:bg-red-950/20 border border-red-200/25 rounded-xl">
+                      <div className="flex justify-between text-[8px] font-bold text-red-700 uppercase">
+                        <span>{a.violationType.toUpperCase()}</span>
+                        <span>{new Date(a.timestamp).toLocaleTimeString()}</span>
+                      </div>
+                      <p className="text-[10px] font-bold text-slate-800 dark:text-slate-255 mt-1">Examinee: {a.studentName}</p>
+                      <span className="text-[8px] text-slate-400 mt-0.5 block">Warning: #{a.warningCount}</span>
+                      {a.screenshotUrl && (
+                        <div className="mt-2 aspect-video rounded-lg overflow-hidden border border-slate-200 dark:border-slate-800">
+                          <img src={a.screenshotUrl} alt="Incident snapshot" className="w-full h-full object-cover transform -scale-x-100"/>
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    };
+
+    // --- MAIN SINGLE PAGE APPLICATION WRAPPER ---
+    function App() {
+      const { user, loading } = useContext(AuthContext);
+      const [view, setView] = useState('landing');
+      
+      const [selectedTestId, setSelectedTestId] = useState(null);
+      const [selectedResultId, setSelectedResultId] = useState(null);
+      const [selectedActiveSessionId, setSelectedActiveSessionId] = useState(null);
+
+      useEffect(() => {
+        if (!loading) {
+          if (user) {
+            if (user.role === 'admin') setView('admin-dashboard');
+            else if (!user.isVerified) setView('verify');
+            else setView('student-dashboard');
+          } else {
+            setView('landing');
+          }
+        }
+      }, [loading, user]);
+
+      if (loading) {
+        return (
+          <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-955">
+            <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+          </div>
+        );
+      }
+
+      return (
+        <div className="min-h-screen flex flex-col transition-colors duration-300">
+          <Navbar currentView={view} setView={setView} />
+          <div className="flex-1 bg-slate-50 dark:bg-slate-955 text-slate-900 dark:text-slate-100">
+            {view === 'landing' && <LandingPage setView={setView} />}
+            {view === 'login' && <LoginPage setView={setView} />}
+            {view === 'register' && <RegisterPage setView={setView} />}
+            {view === 'verify' && <VerificationPage setView={setView} />}
+            {view === 'forgot-password' && <ForgotPasswordPage setView={setView} />}
+            
+            {view === 'student-dashboard' && (
+              <StudentDashboard setView={setView} setSelectedTestId={setSelectedTestId} setSelectedResultId={setSelectedResultId} />
+            )}
+            {view === 'student-exam-setup' && (
+              <ExamSetup testId={selectedTestId} setView={setView} setSelectedActiveSessionId={setSelectedActiveSessionId} />
+            )}
+            {view === 'student-exam-portal' && (
+              <ExamPortal sessionId={selectedActiveSessionId} setView={setView} setSelectedResultId={setSelectedResultId} />
+            )}
+            {view === 'result-details' && (
+              <ResultDetails resultId={selectedResultId} setView={setView} />
+            )}
+
+            {view === 'admin-dashboard' && (
+              <AdminDashboard setView={setView} setSelectedResultId={setSelectedResultId} />
+            )}
+            {view === 'admin-manage-tests' && (
+              <ManageTests setView={setView} />
+            )}
+            {view === 'admin-questions' && (
+              <QuestionBank />
+            )}
+            {view === 'admin-live-monitor' && (
+              <LiveMonitor />
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    const rootEl = ReactDOM.createRoot(document.getElementById('root'));
+    rootEl.render(
+      <React.StrictMode>
+        <DarkModeProvider>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </DarkModeProvider>
+      </React.StrictMode>
+    );
+  </script>
+</body>
+</html>
