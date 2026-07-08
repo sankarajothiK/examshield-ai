@@ -53,6 +53,35 @@ const examSessionSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    faceMatchScore: {
+      type: Number,
+      default: 0,
+    },
+    ocrName: {
+      type: String,
+      default: '',
+    },
+    ocrAadhaar: {
+      type: String,
+      default: '',
+    },
+    ocrDob: {
+      type: String,
+      default: '',
+    },
+    deviceInfo: {
+      type: String,
+      default: '',
+    },
+    browserInfo: {
+      type: String,
+      default: '',
+    },
+    verificationStatus: {
+      type: String,
+      enum: ['pending', 'approved', 'rejected', 'reverification'],
+      default: 'approved',
+    },
   },
   {
     timestamps: true,

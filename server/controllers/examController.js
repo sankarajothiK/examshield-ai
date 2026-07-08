@@ -10,7 +10,18 @@ const Notification = require('../models/Notification');
 // @access  Private
 const startExamSession = async (req, res) => {
   try {
-    const { testId, selfieUrl, aadhaarUrl } = req.body;
+    const {
+      testId,
+      selfieUrl,
+      aadhaarUrl,
+      faceMatchScore,
+      ocrName,
+      ocrAadhaar,
+      ocrDob,
+      deviceInfo,
+      browserInfo,
+      verificationStatus
+    } = req.body;
 
     const test = await Test.findById(testId);
     if (!test) {
@@ -53,6 +64,13 @@ const startExamSession = async (req, res) => {
       ipAddress: req.ip || req.connection.remoteAddress,
       selfieUrl: selfieUrl || '',
       aadhaarUrl: aadhaarUrl || '',
+      faceMatchScore: faceMatchScore || 0,
+      ocrName: ocrName || '',
+      ocrAadhaar: ocrAadhaar || '',
+      ocrDob: ocrDob || '',
+      deviceInfo: deviceInfo || '',
+      browserInfo: browserInfo || '',
+      verificationStatus: verificationStatus || 'pending',
     });
 
     // Notify exam start
@@ -62,6 +80,10 @@ const startExamSession = async (req, res) => {
       message: `You have successfully started the exam: ${test.title}`,
       type: 'exam-started',
     });
+
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
 
     res.status(201).json({ success: true, data: session });
   } catch (error) {
@@ -205,6 +227,10 @@ const logViolation = async (req, res) => {
         type: 'alert',
       });
 
+      if (req.io) {
+        req.io.emit('exam-updated');
+      }
+
       return res.status(200).json({
         success: true,
         disqualified: true,
@@ -303,6 +329,10 @@ const submitExam = async (req, res) => {
       type: 'result-published',
     });
 
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
+
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -322,7 +352,15 @@ const getSessionDetails = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Session not found' });
     }
 
-    res.status(200).json({ success: true, data: session });
+    const test = session.test;
+    const elapsedSeconds = Math.floor((new Date() - new Date(session.startTime)) / 1000);
+    const totalSeconds = test.duration * 60;
+    const timeLeft = Math.max(0, totalSeconds - elapsedSeconds);
+
+    const sessionData = session.toObject();
+    sessionData.timeLeft = timeLeft;
+
+    res.status(200).json({ success: true, data: sessionData });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
@@ -344,6 +382,34 @@ const getAllSessionsAdmin = async (req, res) => {
   }
 };
 
+// @desc    Update identity verification status (Admin only)
+// @route   PUT /api/exams/session/:id/verification
+// @access  Private/Admin
+const updateVerificationStatus = async (req, res) => {
+  try {
+    const { status } = req.body;
+    if (!['approved', 'rejected', 'reverification'].includes(status)) {
+      return res.status(400).json({ success: false, message: 'Invalid verification status' });
+    }
+
+    const session = await ExamSession.findById(req.params.id);
+    if (!session) {
+      return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+
+    session.verificationStatus = status;
+    await session.save();
+
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
+
+    res.status(200).json({ success: true, message: `Verification status updated to ${status}`, data: session });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   startExamSession,
   saveAnswer,
@@ -351,4 +417,5 @@ module.exports = {
   submitExam,
   getSessionDetails,
   getAllSessionsAdmin,
+  updateVerificationStatus,
 };

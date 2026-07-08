@@ -6,6 +6,7 @@ const {
   submitExam,
   getSessionDetails,
   getAllSessionsAdmin,
+  updateVerificationStatus,
 } = require('../controllers/examController');
 const { protect, admin } = require('../middleware/auth');
 
@@ -17,5 +18,6 @@ router.post('/violation', protect, logViolation);
 router.post('/submit', protect, submitExam);
 router.get('/session/:id', protect, getSessionDetails);
 router.get('/admin/sessions', protect, admin, getAllSessionsAdmin);
+router.put('/session/:id/verification', protect, admin, updateVerificationStatus);
 
 module.exports = router;

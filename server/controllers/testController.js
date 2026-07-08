@@ -52,6 +52,10 @@ const createTest = async (req, res) => {
       creator: req.user.id,
     });
 
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
+
     res.status(201).json({ success: true, data: test });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -71,6 +75,28 @@ const getTests = async (req, res) => {
     }
 
     const tests = await Test.find(query).populate('questions', '-correctAnswer -explanation').sort({ startDate: 1 });
+    
+    if (req.user.role === 'student') {
+      const testsWithStatus = [];
+      for (let t of tests) {
+        const session = await ExamSession.findOne({
+          student: req.user.id,
+          test: t._id
+        }).sort({ createdAt: -1 });
+
+        testsWithStatus.push({
+          ...t.toObject(),
+          studentSession: session ? {
+            status: session.status,
+            startTime: session.startTime,
+            endTime: session.endTime,
+            warningCount: session.warningCount
+          } : null
+        });
+      }
+      return res.status(200).json({ success: true, count: testsWithStatus.length, data: testsWithStatus });
+    }
+
     res.status(200).json({ success: true, count: tests.length, data: tests });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -119,6 +145,10 @@ const updateTest = async (req, res) => {
       runValidators: true,
     });
 
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
+
     res.status(200).json({ success: true, data: test });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -138,6 +168,10 @@ const deleteTest = async (req, res) => {
 
     // Also delete references or questions if needed, but keeping questions in QuestionBank is standard
     await test.deleteOne();
+
+    if (req.io) {
+      req.io.emit('exam-updated');
+    }
 
     res.status(200).json({ success: true, message: 'Test removed successfully' });
   } catch (error) {

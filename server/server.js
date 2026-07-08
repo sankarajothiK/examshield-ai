@@ -41,6 +41,12 @@ app.use(
 // Enable CORS
 app.use(cors());
 
+// Attach Socket.io to request object
+app.use((req, res, next) => {
+  req.io = io;
+  next();
+});
+
 // Expose Static Uploads Directory
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static(path.join(__dirname, 'public')));
