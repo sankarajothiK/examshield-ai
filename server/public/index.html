@@ -1401,6 +1401,79 @@
               </div>
             </div>
           )}
+
+          {tab === 'pdf-auto' && (
+            <div className="p-6 glassmorphism rounded-2xl space-y-6">
+              <div className="border-b pb-3 mb-4 text-left">
+                <h4 className="text-sm font-bold text-slate-850 dark:text-slate-105">Automatically Generate Exam from PDF</h4>
+                <p className="text-[11px] text-slate-455 mt-1">Upload a PDF containing questions, and optionally a separate PDF containing answer keys. The system will automatically extract and match them.</p>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Question Paper PDF */}
+                <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
+                  <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
+                  <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Question Paper PDF (Mandatory)</span>
+                  <span className="text-[10px] text-slate-400 mt-1 text-center">Contains the multiple-choice questions & options (A, B, C, D)</span>
+                  
+                  <input type="file" accept="application/pdf" id="q-pdf-input" className="hidden" onChange={e => setQPaperFile(e.target.files[0])} />
+                  
+                  {qPaperFile ? (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{qPaperFile.name}</span>
+                      <button onClick={() => setQPaperFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => document.getElementById('q-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
+                  )}
+                </div>
+
+                {/* Answer Key PDF */}
+                <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
+                  <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
+                  <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Answer Key PDF (Optional)</span>
+                  <span className="text-[10px] text-slate-400 mt-1 text-center">Contains answers matched to question numbers (e.g. 1. B, 2. C)</span>
+                  
+                  <input type="file" accept="application/pdf" id="a-pdf-input" className="hidden" onChange={e => setAKeyFile(e.target.files[0])} />
+                  
+                  {aKeyFile ? (
+                    <div className="mt-3 flex items-center gap-2">
+                      <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{aKeyFile.name}</span>
+                      <button onClick={() => setAKeyFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
+                    </div>
+                  ) : (
+                    <button onClick={() => document.getElementById('a-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-805 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex justify-end pt-4 border-t">
+                <button 
+                  onClick={handlePdfExtraction} 
+                  disabled={extracting || !qPaperFile} 
+                  className="px-6 py-2.5 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-805 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
+                >
+                  {extracting ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Extracting Text...
+                    </>
+                  ) : (
+                    <>
+                      <span>⚡ Start Automatic Generation</span>
+                    </>
+                  )}
+                </button>
+              </div>
+
+              {validationWarning && (
+                <div className="p-4 bg-yellow-50 dark:bg-yellow-950/15 border border-yellow-200 dark:border-yellow-900/30 rounded-xl space-y-1 text-left">
+                  <h5 className="text-xs font-bold text-yellow-805 dark:text-yellow-400 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4" /> Extraction Validation Warning</h5>
+                  <p className="text-[11px] text-yellow-750 dark:text-yellow-400 leading-relaxed font-bold">{validationWarning}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       );
     };
@@ -1508,81 +1581,6 @@
               ))}
             </div>
           )}
-        </div>
-      )}
-
-      {tab === 'pdf-auto' && (
-        <div className="p-6 glassmorphism rounded-2xl space-y-6">
-          <div className="border-b pb-3 mb-4 text-left">
-            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-105">Automatically Generate Exam from PDF</h4>
-            <p className="text-[11px] text-slate-455 mt-1">Upload a PDF containing questions, and optionally a separate PDF containing answer keys. The system will automatically extract and match them.</p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Question Paper PDF */}
-            <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
-              <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
-              <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Question Paper PDF (Mandatory)</span>
-              <span className="text-[10px] text-slate-400 mt-1 text-center">Contains the multiple-choice questions & options (A, B, C, D)</span>
-              
-              <input type="file" accept="application/pdf" id="q-pdf-input" className="hidden" onChange={e => setQPaperFile(e.target.files[0])} />
-              
-              {qPaperFile ? (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{qPaperFile.name}</span>
-                  <button onClick={() => setQPaperFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
-                </div>
-              ) : (
-                <button onClick={() => document.getElementById('q-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
-              )}
-            </div>
-
-            {/* Answer Key PDF */}
-            <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
-              <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
-              <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Answer Key PDF (Optional)</span>
-              <span className="text-[10px] text-slate-400 mt-1 text-center">Contains answers matched to question numbers (e.g. 1. B, 2. C)</span>
-              
-              <input type="file" accept="application/pdf" id="a-pdf-input" className="hidden" onChange={e => setAKeyFile(e.target.files[0])} />
-              
-              {aKeyFile ? (
-                <div className="mt-3 flex items-center gap-2">
-                  <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{aKeyFile.name}</span>
-                  <button onClick={() => setAKeyFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
-                </div>
-              ) : (
-                <button onClick={() => document.getElementById('a-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-805 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
-              )}
-            </div>
-          </div>
-
-          <div className="flex justify-end pt-4 border-t">
-            <button 
-              onClick={handlePdfExtraction} 
-              disabled={extracting || !qPaperFile} 
-              className="px-6 py-2.5 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-805 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
-            >
-              {extracting ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Extracting Text...
-                </>
-              ) : (
-                <>
-                  <span>⚡ Start Automatic Generation</span>
-                </>
-              )}
-            </button>
-          </div>
-
-          {validationWarning && (
-            <div className="p-4 bg-yellow-50 dark:bg-yellow-950/15 border border-yellow-200 dark:border-yellow-900/30 rounded-xl space-y-1 text-left">
-              <h5 className="text-xs font-bold text-yellow-805 dark:text-yellow-400 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4" /> Extraction Validation Warning</h5>
-              <p className="text-[11px] text-yellow-750 dark:text-yellow-400 leading-relaxed font-bold">{validationWarning}</p>
-            </div>
-          )}
-        </div>
-      )}
         </div>
       );
     };
