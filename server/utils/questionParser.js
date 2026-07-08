@@ -1,13 +1,28 @@
+const pdf = require('pdf-parse');
+
 /**
- * Parses question data from uploaded files (CSV, TXT, Excel/DOCX mock outputs)
+ * Parses question data from uploaded files (CSV, TXT, PDF)
  * @param {Buffer} buffer - File buffer
  * @param {String} fileName - Original file name with extension
  * @returns {Array} List of formatted question objects ready to be saved
  */
-const parseUploadedFile = (buffer, fileName) => {
+const parseUploadedFile = async (buffer, fileName) => {
   const extension = fileName.split('.').pop().toLowerCase();
-  const textContent = buffer.toString('utf-8');
+  let textContent = '';
   const questions = [];
+
+  if (extension === 'pdf') {
+    try {
+      const parsedData = await pdf(buffer);
+      textContent = parsedData.text;
+      console.log('Successfully extracted text from PDF question file.');
+    } catch (err) {
+      console.error('Error parsing PDF content:', err.message);
+      return [];
+    }
+  } else {
+    textContent = buffer.toString('utf-8');
+  }
 
   if (extension === 'csv') {
     // Parse CSV line by line
@@ -20,7 +35,7 @@ const parseUploadedFile = (buffer, fileName) => {
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
       
-      // Basic CSV splitter (handles simple quotes, but robust enough for MERN demonstration)
+      // Basic CSV splitter (handles simple quotes)
       const row = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(cell => cell.replace(/^"|"$/g, '').trim());
       
       const questionText = row[0];
@@ -37,7 +52,7 @@ const parseUploadedFile = (buffer, fileName) => {
       if (!questionText || !optA || !optB || !optC || !optD) continue;
 
       let correctAnswer = 0;
-      if (!isNaN(correctVal)) {
+      if (!isNaN(correctVal) && correctVal !== '') {
         correctAnswer = parseInt(correctVal);
       } else {
         const letter = correctVal.toUpperCase();
@@ -59,64 +74,78 @@ const parseUploadedFile = (buffer, fileName) => {
       });
     }
   } else {
-    // For TXT, DOCX/PDF text content: Parse using regex patterns
-    // Expected format block:
-    // Q: What is the primary function of white blood cells?
-    // A) Oxygen transport
-    // B) Fighting infections
-    // C) Blood clotting
-    // D) Digesting food
-    // Answer: B
-    // Explanation: White blood cells are part of the immune system.
-    
-    const blocks = textContent.split(/\r?\n\r?\n/); // split by blank lines
-    
-    blocks.forEach((block) => {
-      if (!block.trim()) return;
+    // For TXT or PDF text content: Parse using an ultra-robust line-by-line state machine
+    const lines = textContent.split(/\r?\n/).map(l => l.trim());
+    let currentQuestion = null;
 
-      const lines = block.split(/\r?\n/).map(l => l.trim()).filter(l => l);
-      let text = '';
-      const options = [];
-      let correctAnswer = 0;
-      let explanation = '';
-      let difficulty = 'medium';
-      let subject = 'General';
+    lines.forEach((line) => {
+      if (!line) return;
 
-      lines.forEach((line) => {
-        if (line.toLowerCase().startsWith('q:') || line.toLowerCase().startsWith('question:')) {
-          text = line.replace(/^(q:|question:)\s*/i, '');
-        } else if (line.match(/^[A-D]\)|^[A-D]\./i)) {
-          options.push(line.replace(/^[A-D]\)|^[A-D]\.\s*/i, ''));
-        } else if (line.toLowerCase().startsWith('answer:') || line.toLowerCase().startsWith('ans:')) {
-          const ansString = line.replace(/^(answer:|ans:)\s*/i, '').trim().toUpperCase();
-          if (ansString.startsWith('A') || ansString.includes('0')) correctAnswer = 0;
-          else if (ansString.startsWith('B') || ansString.includes('1')) correctAnswer = 1;
-          else if (ansString.startsWith('C') || ansString.includes('2')) correctAnswer = 2;
-          else if (ansString.startsWith('D') || ansString.includes('3')) correctAnswer = 3;
-        } else if (line.toLowerCase().startsWith('explanation:')) {
-          explanation = line.replace(/^explanation:\s*/i, '');
-        } else if (line.toLowerCase().startsWith('difficulty:')) {
-          const diffStr = line.replace(/^difficulty:\s*/i, '').trim().toLowerCase();
-          if (['easy', 'medium', 'hard'].includes(diffStr)) difficulty = diffStr;
-        } else if (line.toLowerCase().startsWith('subject:')) {
-          subject = line.replace(/^subject:\s*/i, '').trim();
+      const lowerLine = line.toLowerCase();
+      
+      // Check for Question start: "Q: ...", "Question: ...", or numbered e.g. "1. ..."
+      if (lowerLine.startsWith('q:') || lowerLine.startsWith('question:') || line.match(/^\d+[\.\)]\s/)) {
+        // If we already have a previous complete question block, store it
+        if (currentQuestion && currentQuestion.text && currentQuestion.options.length === 4) {
+          questions.push(currentQuestion);
         }
-      });
+        
+        let qText = line;
+        if (lowerLine.startsWith('q:')) {
+          qText = line.replace(/^q:\s*/i, '');
+        } else if (lowerLine.startsWith('question:')) {
+          qText = line.replace(/^question:\s*/i, '');
+        } else {
+          // Strip out numbers e.g. "1. Cell structure..." -> "Cell structure..."
+          qText = line.replace(/^\d+[\.\)]\s*/, '');
+        }
 
-      // Validate we have a proper block
-      if (text && options.length === 4) {
-        questions.push({
-          text,
-          options,
-          correctAnswer,
+        currentQuestion = {
+          text: qText,
+          options: [],
+          correctAnswer: 0,
           marks: 1,
-          explanation,
-          difficulty,
-          subject,
-          category: subject,
-        });
+          explanation: '',
+          difficulty: 'medium',
+          subject: 'General',
+          category: 'General'
+        };
+      } else if (currentQuestion) {
+        // Check for options: "A) ...", "A. ...", etc.
+        if (line.match(/^[A-D]\)|^[A-D]\./i)) {
+          const optText = line.replace(/^[A-D]\)|^[A-D]\.\s*/i, '');
+          currentQuestion.options.push(optText);
+        }
+        // Check for correct answer: "Answer: ...", "Ans: ..."
+        else if (lowerLine.startsWith('answer:') || lowerLine.startsWith('ans:')) {
+          const ansString = line.replace(/^(answer:|ans:)\s*/i, '').trim().toUpperCase();
+          if (ansString.startsWith('A') || ansString.includes('0')) currentQuestion.correctAnswer = 0;
+          else if (ansString.startsWith('B') || ansString.includes('1')) currentQuestion.correctAnswer = 1;
+          else if (ansString.startsWith('C') || ansString.includes('2')) currentQuestion.correctAnswer = 2;
+          else if (ansString.startsWith('D') || ansString.includes('3')) currentQuestion.correctAnswer = 3;
+        }
+        // Check for explanation: "Explanation: ..."
+        else if (lowerLine.startsWith('explanation:')) {
+          currentQuestion.explanation = line.replace(/^explanation:\s*/i, '');
+        }
+        // Check for difficulty: "Difficulty: ..."
+        else if (lowerLine.startsWith('difficulty:')) {
+          const diffStr = line.replace(/^difficulty:\s*/i, '').trim().toLowerCase();
+          if (['easy', 'medium', 'hard'].includes(diffStr)) currentQuestion.difficulty = diffStr;
+        }
+        // Check for subject: "Subject: ..."
+        else if (lowerLine.startsWith('subject:')) {
+          const subStr = line.replace(/^subject:\s*/i, '').trim();
+          currentQuestion.subject = subStr;
+          currentQuestion.category = subStr;
+        }
       }
     });
+
+    // Don't forget to push the final question block after loop completion
+    if (currentQuestion && currentQuestion.text && currentQuestion.options.length === 4) {
+      questions.push(currentQuestion);
+    }
   }
 
   return questions;

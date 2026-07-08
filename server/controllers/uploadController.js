@@ -12,7 +12,7 @@ const uploadQuestionsFile = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Please upload a file' });
     }
 
-    const extracted = parseUploadedFile(req.file.buffer, req.file.originalname);
+    const extracted = await parseUploadedFile(req.file.buffer, req.file.originalname);
     
     if (extracted.length === 0) {
       return res.status(400).json({
