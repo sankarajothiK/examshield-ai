@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const pdf = require('pdf-parse');
+const { PDFParse } = require('pdf-parse');
 const { parseUploadedFile, parseTextQuestions } = require('../utils/questionParser');
 const Question = require('../models/Question');
 
@@ -188,7 +188,8 @@ const extractExamFromPdfs = async (req, res) => {
     // 1. Extract text from Question Paper PDF
     let qText = '';
     try {
-      const qPdf = await pdf(qPaperFile.buffer);
+      const qPdfParser = new PDFParse(new Uint8Array(qPaperFile.buffer));
+      const qPdf = await qPdfParser.getText();
       qText = qPdf.text;
     } catch (err) {
       return res.status(400).json({ success: false, message: 'Failed to extract text from Question Paper PDF: ' + err.message });
@@ -210,7 +211,8 @@ const extractExamFromPdfs = async (req, res) => {
     if (aKeyFile) {
       let aText = '';
       try {
-        const aPdf = await pdf(aKeyFile.buffer);
+        const aPdfParser = new PDFParse(new Uint8Array(aKeyFile.buffer));
+        const aPdf = await aPdfParser.getText();
         aText = aPdf.text;
       } catch (err) {
         return res.status(400).json({ success: false, message: 'Failed to extract text from Answer Key PDF: ' + err.message });
