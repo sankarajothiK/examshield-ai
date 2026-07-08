@@ -103,6 +103,10 @@ const saveAnswer = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Exam session not found' });
     }
 
+    if (session.student.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized session owner' });
+    }
+
     if (session.status !== 'in-progress') {
       return res.status(400).json({ success: false, message: 'Session is no longer active' });
     }
@@ -131,6 +135,10 @@ const logViolation = async (req, res) => {
     const session = await ExamSession.findById(sessionId).populate('test', 'title maxAttempts');
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+
+    if (session.student.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized session owner' });
     }
 
     if (session.status !== 'in-progress') {
@@ -261,6 +269,10 @@ const submitExam = async (req, res) => {
       return res.status(404).json({ success: false, message: 'Session not found' });
     }
 
+    if (session.student.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized session owner' });
+    }
+
     if (session.status !== 'in-progress') {
       return res.status(400).json({ success: false, message: 'Exam has already been submitted or disqualified' });
     }
@@ -350,6 +362,10 @@ const getSessionDetails = async (req, res) => {
 
     if (!session) {
       return res.status(404).json({ success: false, message: 'Session not found' });
+    }
+
+    if (req.user.role !== 'admin' && session.student._id.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized session owner' });
     }
 
     const test = session.test;

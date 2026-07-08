@@ -9,9 +9,7 @@ const pdfService = require('../services/pdfService');
 // @access  Private
 const getMyResults = async (req, res) => {
   try {
-    if (req.user.role === 'student') {
-      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
-    }
+    // Allowed for all logged-in students to fetch their own results list
 
     const results = await Result.find({ student: req.user.id })
       .populate('test', 'title duration passingMarks')
@@ -28,10 +26,6 @@ const getMyResults = async (req, res) => {
 // @access  Private
 const getResultById = async (req, res) => {
   try {
-    if (req.user.role === 'student') {
-      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
-    }
-
     const result = await Result.findById(req.params.id)
       .populate('test', 'title duration passingMarks negativeMarks instructions')
       .populate('student', 'name email avatar')
@@ -39,6 +33,10 @@ const getResultById = async (req, res) => {
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Result record not found' });
+    }
+
+    if (req.user.role !== 'admin' && result.student._id.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized access to this result record' });
     }
 
     res.status(200).json({ success: true, data: result });
@@ -142,10 +140,6 @@ const getAdminReports = async (req, res) => {
 // @access  Private
 const downloadResultPdf = async (req, res) => {
   try {
-    if (req.user.role === 'student') {
-      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
-    }
-
     const result = await Result.findById(req.params.id)
       .populate('test')
       .populate('student', 'name email avatar')
@@ -153,6 +147,10 @@ const downloadResultPdf = async (req, res) => {
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Result not found' });
+    }
+
+    if (req.user.role !== 'admin' && result.student._id.toString() !== req.user.id.toString()) {
+      return res.status(403).json({ success: false, message: 'Access denied: Unauthorized access to this result PDF' });
     }
 
     // Set Response Headers

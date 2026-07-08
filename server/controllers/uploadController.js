@@ -188,7 +188,7 @@ const extractExamFromPdfs = async (req, res) => {
     // 1. Extract text from Question Paper PDF
     let qText = '';
     try {
-      const qPdfParser = new PDFParse(new Uint8Array(qPaperFile.buffer));
+      const qPdfParser = new PDFParse({ data: new Uint8Array(qPaperFile.buffer) });
       const qPdf = await qPdfParser.getText();
       qText = qPdf.text;
     } catch (err) {
@@ -211,7 +211,7 @@ const extractExamFromPdfs = async (req, res) => {
     if (aKeyFile) {
       let aText = '';
       try {
-        const aPdfParser = new PDFParse(new Uint8Array(aKeyFile.buffer));
+        const aPdfParser = new PDFParse({ data: new Uint8Array(aKeyFile.buffer) });
         const aPdf = await aPdfParser.getText();
         aText = aPdf.text;
       } catch (err) {
