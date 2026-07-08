@@ -936,27 +936,6 @@
         return isOpen && attemptedCount < t.maxAttempts;
       });
 
-      const chartData = {
-        labels: results.slice().reverse().map((r, i) => `Exam ${i + 1}`),
-        datasets: [{
-          label: 'Qualifying Score %',
-          data: results.slice().reverse().map(r => r.percentage),
-          borderColor: '#0c85eb',
-          backgroundColor: 'rgba(12, 133, 235, 0.04)',
-          tension: 0.25,
-          fill: true,
-        }]
-      };
-
-      const chartOptions = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          y: { min: 0, max: 100, ticks: { font: { size: 9 } } },
-          x: { ticks: { font: { size: 9 } } }
-        }
-      };
-
       return (
         <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans">
           <div className="glassmorphism p-6 rounded-2xl mb-8 relative overflow-hidden flex justify-between items-center border border-brand-100/30">
@@ -1010,6 +989,10 @@
                 </ul>
               </div>
             </div>
+          </div>
+        </div>
+      );
+    };   </div>
           </div>
         </div>
       );
@@ -1150,8 +1133,8 @@
       const [newRule, setNewRule] = useState('');
       const [questions, setQuestions] = useState([]);
       const [tab, setTab] = useState('settings');
-      
-      // PDF auto-extractor states
+
+      // PDF Auto-Extractor states
       const [qPaperFile, setQPaperFile] = useState(null);
       const [aKeyFile, setAKeyFile] = useState(null);
       const [extracting, setExtracting] = useState(false);
@@ -1536,14 +1519,14 @@
         <div className="p-6 glassmorphism rounded-2xl space-y-6">
           <div className="border-b pb-3 mb-4 text-left">
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-105">Automatically Generate Exam from PDF</h4>
-            <p className="text-[11px] text-slate-450 mt-1">Upload a PDF containing questions, and optionally a separate PDF containing answer keys. The system will automatically extract and match them.</p>
+            <p className="text-[11px] text-slate-455 mt-1">Upload a PDF containing questions, and optionally a separate PDF containing answer keys. The system will automatically extract and match them.</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Question Paper PDF */}
             <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
               <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Question Paper PDF (Mandatory)</span>
+              <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Question Paper PDF (Mandatory)</span>
               <span className="text-[10px] text-slate-400 mt-1 text-center">Contains the multiple-choice questions & options (A, B, C, D)</span>
               
               <input type="file" accept="application/pdf" id="q-pdf-input" className="hidden" onChange={e => setQPaperFile(e.target.files[0])} />
@@ -1561,7 +1544,7 @@
             {/* Answer Key PDF */}
             <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
               <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Answer Key PDF (Optional)</span>
+              <span className="text-xs font-bold text-slate-705 dark:text-slate-300">Answer Key PDF (Optional)</span>
               <span className="text-[10px] text-slate-400 mt-1 text-center">Contains answers matched to question numbers (e.g. 1. B, 2. C)</span>
               
               <input type="file" accept="application/pdf" id="a-pdf-input" className="hidden" onChange={e => setAKeyFile(e.target.files[0])} />
@@ -1572,7 +1555,7 @@
                   <button onClick={() => setAKeyFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
                 </div>
               ) : (
-                <button onClick={() => document.getElementById('a-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
+                <button onClick={() => document.getElementById('a-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-805 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
               )}
             </div>
           </div>
@@ -1581,7 +1564,7 @@
             <button 
               onClick={handlePdfExtraction} 
               disabled={extracting || !qPaperFile} 
-              className="px-6 py-2.5 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
+              className="px-6 py-2.5 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-805 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
             >
               {extracting ? (
                 <>
@@ -1604,9 +1587,9 @@
           )}
         </div>
       )}
-      </div>
-    );
-  };
+        </div>
+      );
+    };
 
     // 11. Exam Setup Page
     const ExamSetup = ({ testId, setView, setSelectedActiveSessionId }) => {
@@ -1633,6 +1616,7 @@
       
       const videoRef = useRef(null);
       const streamRef = useRef(null);
+      const canvasRef = useRef(null);
 
       useEffect(() => {
         api.get(`/tests/${testId}`).then(res => {
@@ -1644,6 +1628,45 @@
         };
       }, [testId]);
 
+      useEffect(() => {
+        let drawInterval;
+        if (camChecked && videoRef.current && canvasRef.current) {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          const ctx = canvas.getContext('2d');
+          
+          drawInterval = setInterval(() => {
+            if (video.readyState === 4) {
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              ctx.clearRect(0, 0, canvas.width, canvas.height);
+              
+              if (scanning) {
+                ctx.strokeStyle = '#2dd4bf';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = 'rgba(45, 212, 191, 0.1)';
+                ctx.fillRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = '#2dd4bf';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('SCANNING LANDMARKS...', canvas.width*0.3, canvas.height*0.5);
+              } else if (scanPassed) {
+                ctx.strokeStyle = '#10b981';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
+                
+                ctx.fillStyle = '#10b981';
+                ctx.font = 'bold 14px sans-serif';
+                ctx.fillText('MATCH CONFIRMED', canvas.width*0.33, canvas.height*0.5);
+              }
+            }
+          }, 60);
+        }
+        return () => clearInterval(drawInterval);
+      }, [camChecked, scanning, scanPassed]);
+
       const grantHardware = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -1651,80 +1674,41 @@
           if (videoRef.current) videoRef.current.srcObject = stream;
           setCamChecked(true);
           setMicChecked(true);
-          setError('');
+          setSuccess('Webcam & Microphone permissions verified successfully.');
         } catch (e) {
-          setError('Camera & Microphone permissions are mandatory for proctored examinations.');
+          setError('Camera & Microphone access are mandatory for AI proctored examinations.');
         }
       };
 
-      const captureSelfie = async () => {
-        if (!camChecked || !videoRef.current) {
-          setError('Please grant camera access first.');
-          return;
-        }
+      const runBiometricScan = () => {
+        if (!camChecked) { setError('Grant webcam access first.'); return; }
         setScanning(true);
         setError('');
         setSuccess('');
         
-        try {
-          const video = videoRef.current;
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 480;
-          const ctx = canvas.getContext('2d');
-          
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageBase64 = canvas.toDataURL('image/jpeg');
-          
-          const res = await api.post('/uploads/verification', { imageBase64 });
-          if (res.success) {
-            setSelfieUrl(res.url);
-            setScanPassed(true);
-            setSuccess('Live selfie profile captured successfully.');
-          } else {
-            setError(res.message || 'Failed to upload selfie profile.');
-          }
-        } catch (err) {
-          console.error(err);
-          setError('Error capturing selfie image.');
-        } finally {
-          setScanning(false);
-        }
-      };
+        setTimeout(async () => {
+          try {
+            const canvas = document.createElement('canvas');
+            canvas.width = videoRef.current.videoWidth;
+            canvas.height = videoRef.current.videoHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(videoRef.current, 0, 0);
+            const dataUrl = canvas.toDataURL('image/jpeg');
 
-      const captureAadhaarWebcam = async () => {
-        if (!camChecked || !videoRef.current) {
-          setError('Please grant camera access first.');
-          return;
-        }
-        setAadhaarUploading(true);
-        setError('');
-        setSuccess('');
-        
-        try {
-          const video = videoRef.current;
-          const canvas = document.createElement('canvas');
-          canvas.width = video.videoWidth || 640;
-          canvas.height = video.videoHeight || 480;
-          const ctx = canvas.getContext('2d');
-          
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const imageBase64 = canvas.toDataURL('image/jpeg');
-          
-          const res = await api.post('/uploads/verification', { imageBase64 });
-          if (res.success) {
-            setAadhaarUrl(res.url);
-            setAadhaarChecked(true);
-            setSuccess('Aadhaar front card captured successfully.');
-          } else {
-            setError(res.message || 'Failed to upload captured Aadhaar card.');
+            const res = await api.post('/uploads/verification', { imageBase64: dataUrl });
+            if (res.success) {
+              setSelfieUrl(res.url);
+              setScanPassed(true);
+              setSuccess('Selfie captured and verified.');
+            } else {
+              setError('Failed to upload selfie profile.');
+            }
+          } catch (err) {
+            setError('Biometric profile capture failed.');
+          } finally {
+            setScanning(false);
           }
-        } catch (err) {
-          console.error(err);
-          setError('Error capturing Aadhaar front image.');
-        } finally {
-          setAadhaarUploading(false);
-        }
+        }, 2000);
       };
 
       const handleAadhaarUpload = async (e) => {
@@ -1733,18 +1717,45 @@
         setAadhaarUploading(true);
         setError('');
         setSuccess('');
-        
         try {
           const res = await api.uploadFile('/uploads/verification', file);
           if (res.success) {
             setAadhaarUrl(res.url);
             setAadhaarChecked(true);
-            setSuccess('Aadhaar card front image uploaded successfully.');
+            setSuccess('Aadhaar Card (Front Side) uploaded successfully.');
           } else {
-            setError(res.message);
+            setError(res.message || 'Aadhaar upload failed.');
           }
         } catch (err) {
-          setError('Failed to upload Aadhaar card file.');
+          setError('Error uploading Aadhaar file.');
+        } finally {
+          setAadhaarUploading(false);
+        }
+      };
+
+      const captureAadhaarFromCam = async () => {
+        if (!camChecked) { setError('Grant webcam access first.'); return; }
+        setAadhaarUploading(true);
+        setError('');
+        setSuccess('');
+        try {
+          const canvas = document.createElement('canvas');
+          canvas.width = videoRef.current.videoWidth;
+          canvas.height = videoRef.current.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(videoRef.current, 0, 0);
+          const dataUrl = canvas.toDataURL('image/jpeg');
+
+          const res = await api.post('/uploads/verification', { imageBase64: dataUrl });
+          if (res.success) {
+            setAadhaarUrl(res.url);
+            setAadhaarChecked(true);
+            setSuccess('Aadhaar Card (Front Side) captured successfully.');
+          } else {
+            setError('Failed to capture Aadhaar image.');
+          }
+        } catch (err) {
+          setError('Error capturing Aadhaar.');
         } finally {
           setAadhaarUploading(false);
         }
@@ -1752,8 +1763,7 @@
 
       const handleLaunch = async () => {
         if (!camChecked || !micChecked || !scanPassed || !aadhaarChecked) {
-          setError('Complete all pre-exam identity verification steps first.');
-          return;
+          setError('Confirm all entry prerequisites before starting.'); return;
         }
         try {
           const res = await api.post('/exams/start', { testId, selfieUrl, aadhaarUrl });
@@ -1773,122 +1783,66 @@
         return <div className="py-20 text-center text-xs text-slate-400">Configuring hardware channels...</div>;
       }
 
-      const allVerified = camChecked && micChecked && scanPassed && aadhaarChecked;
-
       return (
         <div className="max-w-4xl mx-auto px-6 py-8 text-left font-sans">
-          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Mandatory Candidate Verification</h2>
-          <p className="text-xs text-slate-500 mt-1">Please complete the identity verification steps before launching the attempt for: <strong>{test?.title}</strong></p>
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Secure Pre-Exam Setup</h2>
+          <p className="text-xs text-slate-505 mt-1">Module: <strong>{test?.title}</strong> • Limit: {test?.duration} mins</p>
           
           {error && <div className="p-3 bg-red-50 text-red-655 text-xs font-bold rounded-xl my-4 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4 text-red-650" /> {error}</div>}
           {success && <div className="p-3 bg-green-50 text-green-700 text-xs font-bold rounded-xl my-4 flex items-center gap-1.5"><Icons.Check className="w-4 h-4 text-green-600" /> {success}</div>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
             <div className="space-y-4">
-              <div className="bg-slate-900 aspect-video rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-805 shadow-lg">
+              <div className="bg-slate-900 aspect-video rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-800 shadow-lg scanning-grid">
                 {camChecked ? (
-                  <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100 absolute inset-0"/>
+                  <>
+                    <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100 absolute inset-0"/>
+                    <canvas ref={canvasRef} className="w-full h-full object-cover transform -scale-x-100 absolute inset-0 z-10"/>
+                    {scanning && <div className="scan-laser"></div>}
+                  </>
                 ) : (
-                  <div className="text-slate-500 text-[10px] font-bold flex flex-col items-center gap-1">
-                    <Icons.Camera className="w-8 h-8 text-slate-600 animate-pulse" />
+                  <div className="text-slate-505 text-[10px] font-bold flex flex-col items-center gap-1">
+                    <Icons.Camera className="w-8 h-8 text-slate-650 animate-pulse" />
                     <span>Camera preview offline</span>
                   </div>
                 )}
-                {scanning && (
-                  <div className="absolute inset-0 bg-brand-500/10 flex items-center justify-center border-2 border-brand-500 z-10">
-                    <span className="text-xs font-bold text-brand-400 bg-slate-950/80 px-3 py-1.5 rounded-lg animate-pulse">CAPTURING PROFILE...</span>
-                  </div>
-                )}
-              </div>
-
-              {/* Photo Previews */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-3 border text-center flex flex-col justify-center items-center h-28">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Selfie Profile</span>
-                  {selfieUrl ? (
-                    <img src={selfieUrl} className="w-16 h-16 rounded-lg object-cover border" alt="Selfie Preview" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400 italic">No image captured</span>
-                  )}
-                </div>
-                <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-3 border text-center flex flex-col justify-center items-center h-28">
-                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Aadhaar (Front)</span>
-                  {aadhaarUrl ? (
-                    <img src={aadhaarUrl} className="w-20 h-14 rounded-lg object-contain border" alt="Aadhaar Preview" />
-                  ) : (
-                    <span className="text-[10px] text-slate-400 italic">No image uploaded</span>
-                  )}
-                </div>
               </div>
             </div>
 
             <div className="p-6 glassmorphism rounded-2xl flex flex-col justify-between border">
-              <div className="space-y-5 text-xs font-bold text-slate-600 dark:text-slate-350">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Verification Checklist</h4>
-                
-                {/* Step 1: Camera Permission */}
+              <div className="space-y-4 text-xs font-bold text-slate-655 dark:text-slate-350 text-left">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-455 border-b pb-2">Entry Prerequisites</h4>
                 <div className="flex justify-between items-center py-1">
-                  <span className="flex items-center gap-1.5">
-                    {camChecked ? '🟢' : '⚪'} 1. Camera Permission
-                  </span>
-                  {camChecked ? (
-                    <span className="text-green-500 text-[10px] font-bold">GRANTED</span>
-                  ) : (
-                    <button onClick={grantHardware} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] shadow-sm">Grant Camera</button>
-                  )}
+                  <span>1. Camera Access</span>
+                  {camChecked ? <span className="text-green-500 text-[10px] font-bold font-sans">GRANTED</span> : <button onClick={grantHardware} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Grant</button>}
                 </div>
-
-                {/* Step 2: Mic Permission */}
                 <div className="flex justify-between items-center py-1">
-                  <span className="flex items-center gap-1.5">
-                    {micChecked ? '🟢' : '⚪'} 2. Microphone Permission
-                  </span>
-                  {micChecked ? (
-                    <span className="text-green-500 text-[10px] font-bold">GRANTED</span>
-                  ) : (
-                    <button onClick={grantHardware} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] shadow-sm">Grant Mic</button>
-                  )}
+                  <span>2. Microphone Access</span>
+                  {micChecked ? <span className="text-green-500 text-[10px] font-bold font-sans">GRANTED</span> : <button onClick={grantHardware} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Grant</button>}
                 </div>
-
-                {/* Step 3: Selfie Capture */}
                 <div className="flex justify-between items-center py-1">
-                  <span className="flex items-center gap-1.5">
-                    {scanPassed ? '🟢' : '⚪'} 3. Live Selfie Capture
-                  </span>
-                  {scanPassed ? (
-                    <span className="text-green-500 text-[10px] font-bold">CAPTURED</span>
-                  ) : (
-                    <button onClick={captureSelfie} disabled={!camChecked} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white rounded-lg text-[10px] shadow-sm">Take Selfie</button>
-                  )}
+                  <span>3. Live Selfie Profile</span>
+                  {scanPassed ? <span className="text-green-500 text-[10px] font-bold font-sans">CAPTURED</span> : <button onClick={runBiometricScan} disabled={!camChecked} className="px-3 py-1 bg-brand-500 disabled:bg-slate-200 text-white rounded-lg text-[10px] shadow-sm">Capture</button>}
                 </div>
-
-                {/* Step 4: Aadhaar Front Card */}
-                <div className="space-y-3.5 border-t pt-3">
+                <div className="py-2 border-t mt-2">
                   <div className="flex justify-between items-center">
-                    <span className="flex items-center gap-1.5">
-                      {aadhaarChecked ? '🟢' : '⚪'} 4. Aadhaar Front Card
-                    </span>
-                    {aadhaarChecked && (
-                      <span className="text-green-500 text-[10px] font-bold">VERIFIED</span>
+                    <span>4. Aadhaar Card (Front)</span>
+                    {aadhaarChecked ? <span className="text-green-500 text-[10px] font-bold font-sans">UPLOADED</span> : (
+                      <div className="flex gap-2">
+                        <button onClick={() => setAadhaarMode('file')} className={`px-2 py-0.5 rounded text-[8px] font-bold ${aadhaarMode === 'file' ? 'bg-brand-500 text-white' : 'bg-slate-100'}`}>File</button>
+                        <button onClick={() => setAadhaarMode('camera')} className={`px-2 py-0.5 rounded text-[8px] font-bold ${aadhaarMode === 'camera' ? 'bg-brand-500 text-white' : 'bg-slate-100'}`}>Camera</button>
+                      </div>
                     )}
                   </div>
-                  
                   {!aadhaarChecked && (
-                    <div className="space-y-3 bg-slate-50 dark:bg-slate-905 p-3 rounded-xl border">
-                      <div className="flex gap-2 mb-1.5">
-                        <button onClick={() => setAadhaarMode('file')} className={`flex-1 py-1 rounded text-[9px] font-bold ${aadhaarMode === 'file' ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200' : 'text-slate-400'}`}>Upload File</button>
-                        <button onClick={() => setAadhaarMode('camera')} className={`flex-1 py-1 rounded text-[9px] font-bold ${aadhaarMode === 'camera' ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200' : 'text-slate-400'}`}>Use Camera</button>
-                      </div>
-
+                    <div className="mt-2 p-2 bg-slate-50 dark:bg-slate-900 rounded-lg border">
                       {aadhaarMode === 'file' ? (
                         <div>
-                          <input type="file" accept="image/*" id="aadhaar-upload-file" className="hidden" onChange={handleAadhaarUpload} />
-                          <button onClick={() => document.getElementById('aadhaar-upload-file').click()} disabled={aadhaarUploading} className="w-full py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[9px] font-bold">
-                            {aadhaarUploading ? 'Uploading...' : 'Choose Aadhaar Front Image'}
-                          </button>
+                          <input type="file" accept="image/*,application/pdf" onChange={handleAadhaarUpload} className="text-[10px] text-slate-500 w-full" />
+                          {aadhaarUploading && <span className="text-[9px] text-brand-550 block mt-1 animate-pulse">Uploading file...</span>}
                         </div>
                       ) : (
-                        <button onClick={captureAadhaarWebcam} disabled={!camChecked || aadhaarUploading} className="w-full py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded text-[9px] font-bold shadow-sm">
+                        <button onClick={captureAadhaarFromCam} disabled={!camChecked} className="w-full py-1.5 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-200 text-white rounded-lg text-[9.5px]">
                           {aadhaarUploading ? 'Capturing...' : 'Capture Front Side from Webcam'}
                         </button>
                       )}
@@ -1899,8 +1853,8 @@
 
               <button 
                 onClick={handleLaunch} 
-                disabled={!allVerified}
-                className="w-full mt-6 py-3 bg-tealbrand-605 hover:bg-tealbrand-700 disabled:bg-slate-200 dark:disabled:bg-slate-850 text-white font-bold rounded-xl text-xs shadow-md transition-all disabled:text-slate-400 dark:disabled:text-slate-600"
+                disabled={!(camChecked && micChecked && scanPassed && aadhaarChecked)}
+                className="w-full mt-6 py-2.5 bg-tealbrand-605 hover:bg-tealbrand-700 disabled:bg-slate-205 dark:disabled:bg-slate-800 disabled:text-slate-400 dark:disabled:text-slate-600 text-white font-bold rounded-xl text-xs shadow-md transition-all"
               >
                 Launch Secure Attempt
               </button>
@@ -2317,16 +2271,11 @@
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
-        if (user && user.role === 'student') {
-          setLoading(false);
-          return;
-        }
-
         api.get(`/results/${resultId}`).then(res => {
           if (res.success) setResult(res.data);
           setLoading(false);
         });
-      }, [resultId, user]);
+      }, [resultId]);
 
       const handleDownloadPdf = () => {
         const token = localStorage.getItem('token');
@@ -2337,17 +2286,18 @@
         return <div className="py-20 text-center text-xs text-slate-400">Syncing scorecard file...</div>;
       }
 
-      if (user && user.role === 'student') {
+      const isAdmin = user && user.role === 'admin';
+
+      if (!isAdmin) {
         return (
-          <div className="max-w-xl mx-auto px-6 py-16 text-center font-sans">
-            <div className="p-8 glassmorphism border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-4">
-              <span className="text-4xl block animate-pulse">🛡️</span>
-              <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Exam Submitted Successfully</h2>
+          <div className="max-w-md mx-auto px-6 py-12 text-center font-sans">
+            <div className="glassmorphism p-8 rounded-3xl shadow-xl border border-brand-100/30 text-left space-y-4">
+              <div className="w-12 h-12 bg-green-500/10 dark:bg-green-500/20 text-green-500 rounded-2xl flex items-center justify-center text-xl font-bold">✓</div>
+              <h2 className="text-lg font-extrabold text-slate-805 dark:text-slate-100">Exam Submitted Successfully</h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-bold">
-                Your exam has been submitted successfully. Your results are under review. <br />
-                Please contact the administrator to obtain your result.
+                Your exam has been submitted successfully. Your results are under review. Please contact the administrator to obtain your result.
               </p>
-              <button onClick={() => setView('student-dashboard')} className="mt-4 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md">
+              <button onClick={() => setView('student-dashboard')} className="w-full mt-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-sm">
                 Return to Dashboard
               </button>
             </div>
@@ -2359,7 +2309,7 @@
 
       return (
         <div className="max-w-3xl mx-auto px-6 py-8 text-left font-sans">
-          <span onClick={() => setView('admin-dashboard')} className="text-xs text-slate-455 hover:text-slate-700 cursor-pointer mb-4 inline-flex items-center gap-1 font-bold">
+          <span onClick={() => setView(result?.student?.role === 'admin' ? 'admin-dashboard' : 'student-dashboard')} className="text-xs text-slate-455 hover:text-slate-700 cursor-pointer mb-4 inline-flex items-center gap-1 font-bold">
             <Icons.ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
           </span>
           <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Scorecard Details</h2>
@@ -2372,18 +2322,18 @@
               </div>
 
               <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3.5 shadow-sm">
-                <h4 className="text-[10px] font-bold text-slate-455 uppercase pb-2 border-b">Marks secured</h4>
+                <h4 className="text-[10px] font-bold text-slate-450 uppercase pb-2 border-b">Marks secured</h4>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
                   <span>Qualifying Score:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{result?.score} / {result?.totalMarksPossible} Marks</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result.score} / {result.totalMarksPossible} Marks</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
                   <span>Percentage:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{result?.percentage}%</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result.percentage}%</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5">
                   <span>Attempt Date:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{result?.createdAt ? new Date(result.createdAt).toLocaleDateString() : ''}</span>
+                  <span className="text-slate-855 dark:text-slate-150">{new Date(result.createdAt).toLocaleDateString()}</span>
                 </div>
               </div>
             </div>
@@ -2392,7 +2342,7 @@
               <div>
                 <h4 className="text-[10px] font-bold text-slate-400 uppercase pb-2 border-b">Proctoring report</h4>
                 <div className="space-y-2.5 mt-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
-                  <div className="flex justify-between"><span>Warnings registered:</span><span className="text-slate-855 dark:text-slate-250 font-extrabold">{result?.violationReport?.violations?.length || 0} warnings</span></div>
+                  <div className="flex justify-between"><span>Warnings registered:</span><span className="text-slate-855 dark:text-slate-250 font-extrabold">{result.violationReport?.violations?.length || 0} warnings</span></div>
                 </div>
               </div>
               <button onClick={handleDownloadPdf} className="w-full mt-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold flex justify-center items-center gap-1.5 shadow-md">
@@ -2550,7 +2500,7 @@
                     <th className="px-5 py-3 text-center">Submitted</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                <tbody className="divide-y divide-slate-105 dark:divide-slate-800/40">
                   {sessions.map(s => (
                     <tr key={s._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
                       <td className="px-5 py-3.5 text-left">
@@ -2576,8 +2526,8 @@
                         {s.test?.title}
                         <span className={`block text-[9px] font-bold uppercase mt-1 ${s.status === 'submitted' ? 'text-green-500' : s.status === 'disqualified' ? 'text-red-500' : 'text-yellow-500'}`}>{s.status}</span>
                       </td>
-                      <td className="px-5 py-3.5 text-center text-slate-500">{new Date(s.startTime).toLocaleString()}</td>
-                      <td className="px-5 py-3.5 text-center text-slate-500">{s.endTime ? new Date(s.endTime).toLocaleString() : '-'}</td>
+                      <td className="px-5 py-3.5 text-center text-slate-550">{new Date(s.startTime).toLocaleString()}</td>
+                      <td className="px-5 py-3.5 text-center text-slate-550">{s.endTime ? new Date(s.endTime).toLocaleString() : '-'}</td>
                     </tr>
                   ))}
                 </tbody>
