@@ -9,6 +9,10 @@ const pdfService = require('../services/pdfService');
 // @access  Private
 const getMyResults = async (req, res) => {
   try {
+    if (req.user.role === 'student') {
+      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
+    }
+
     const results = await Result.find({ student: req.user.id })
       .populate('test', 'title duration passingMarks')
       .sort({ createdAt: -1 });
@@ -24,6 +28,10 @@ const getMyResults = async (req, res) => {
 // @access  Private
 const getResultById = async (req, res) => {
   try {
+    if (req.user.role === 'student') {
+      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
+    }
+
     const result = await Result.findById(req.params.id)
       .populate('test', 'title duration passingMarks negativeMarks instructions')
       .populate('student', 'name email avatar')
@@ -31,11 +39,6 @@ const getResultById = async (req, res) => {
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Result record not found' });
-    }
-
-    // Students can only view their own result unless they are admin
-    if (req.user.role === 'student' && result.student._id.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Access denied to this result file' });
     }
 
     res.status(200).json({ success: true, data: result });
@@ -139,6 +142,10 @@ const getAdminReports = async (req, res) => {
 // @access  Private
 const downloadResultPdf = async (req, res) => {
   try {
+    if (req.user.role === 'student') {
+      return res.status(403).json({ success: false, message: 'Access denied: Results are hidden from candidates' });
+    }
+
     const result = await Result.findById(req.params.id)
       .populate('test')
       .populate('student', 'name email avatar')
@@ -146,10 +153,6 @@ const downloadResultPdf = async (req, res) => {
 
     if (!result) {
       return res.status(404).json({ success: false, message: 'Result not found' });
-    }
-
-    if (req.user.role === 'student' && result.student._id.toString() !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'Not authorized to download this report' });
     }
 
     // Set Response Headers

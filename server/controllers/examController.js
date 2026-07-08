@@ -10,7 +10,7 @@ const Notification = require('../models/Notification');
 // @access  Private
 const startExamSession = async (req, res) => {
   try {
-    const { testId } = req.body;
+    const { testId, selfieUrl, aadhaarUrl } = req.body;
 
     const test = await Test.findById(testId);
     if (!test) {
@@ -51,6 +51,8 @@ const startExamSession = async (req, res) => {
       tabSwitches: 0,
       fullscreenExits: 0,
       ipAddress: req.ip || req.connection.remoteAddress,
+      selfieUrl: selfieUrl || '',
+      aadhaarUrl: aadhaarUrl || '',
     });
 
     // Notify exam start
@@ -293,11 +295,11 @@ const submitExam = async (req, res) => {
       violationReport: violationReport ? violationReport._id : null,
     });
 
-    // Notify exam completion
+    // Notify exam completion (results hidden, under review)
     await Notification.create({
       recipient: req.user.id,
-      title: 'Exam Results Available',
-      message: `You completed "${test.title}" with a score of ${totalScore}/${totalMarksPossible} (${percentage}%). Status: ${status.toUpperCase()}`,
+      title: 'Exam Submitted Successfully',
+      message: `Your exam "${test.title}" has been submitted successfully. Your results are under review. Please contact the administrator to obtain your result.`,
       type: 'result-published',
     });
 
@@ -326,10 +328,27 @@ const getSessionDetails = async (req, res) => {
   }
 };
 
+// @desc    Get all exam sessions with verification images (Admin only)
+// @route   GET /api/exams/admin/sessions
+// @access  Private/Admin
+const getAllSessionsAdmin = async (req, res) => {
+  try {
+    const sessions = await ExamSession.find({})
+      .populate('student', 'name email')
+      .populate('test', 'title')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: sessions.length, data: sessions });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   startExamSession,
   saveAnswer,
   logViolation,
   submitExam,
   getSessionDetails,
+  getAllSessionsAdmin,
 };

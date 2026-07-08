@@ -45,6 +45,14 @@ const examSessionSchema = new mongoose.Schema(
       type: String,
       default: '',
     },
+    selfieUrl: {
+      type: String,
+      default: '',
+    },
+    aadhaarUrl: {
+      type: String,
+      default: '',
+    },
   },
   {
     timestamps: true,

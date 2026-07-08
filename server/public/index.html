@@ -494,6 +494,9 @@
                 <button onClick={() => setView('admin-live-monitor')} className={`text-xs font-bold px-3.5 py-2 rounded-xl text-red-500 animate-pulse flex items-center gap-1.5 transition-all ${currentView === 'admin-live-monitor' ? 'bg-red-500 text-white animate-none shadow-sm' : 'hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
                   <Icons.Live className="w-3.5 h-3.5 text-red-500" /> Live Monitor
                 </button>
+                <button onClick={() => setView('admin-verifications')} className={`text-xs font-bold px-3.5 py-2 rounded-xl flex items-center gap-1.5 transition-all ${currentView === 'admin-verifications' ? 'bg-brand-500 text-white shadow-sm' : 'text-slate-600 dark:text-slate-355 hover:bg-slate-100 dark:hover:bg-slate-800'}`}>
+                  👤 Verification Logs
+                </button>
               </>
             ) : (
               <>
@@ -966,7 +969,7 @@
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-            <div className="lg:col-span-7 space-y-6">
+            <div className="lg:col-span-8 space-y-6">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-200 mb-4 flex items-center gap-1.5">
                   <span className="flex w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span> Live Qualifying Exams
@@ -994,52 +997,9 @@
                   </div>
                 )}
               </div>
-
-              <div>
-                <h3 className="text-sm font-extrabold text-slate-800 dark:text-slate-200 mb-4">Qualifying Standing & Results</h3>
-                {results.length === 0 ? (
-                  <div className="p-6 glassmorphism rounded-2xl text-center text-xs text-slate-400">Zero past examinations registered.</div>
-                ) : (
-                  <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800/80 rounded-2xl overflow-hidden shadow-sm">
-                    <table className="w-full text-xs">
-                      <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-500 uppercase border-b border-slate-100 dark:border-slate-800">
-                        <tr>
-                          <th className="px-5 py-3 text-left">Exam Module</th>
-                          <th className="px-5 py-3 text-center">Score</th>
-                          <th className="px-5 py-3 text-center">Result</th>
-                          <th className="px-5 py-3 text-center">Review</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
-                        {results.map(r => (
-                          <tr key={r._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
-                            <td className="px-5 py-3.5 text-left font-bold text-slate-800 dark:text-slate-200">{r.test?.title}<span className="block text-[9px] text-slate-400 font-normal mt-0.5">{new Date(r.createdAt).toLocaleDateString()}</span></td>
-                            <td className="px-5 py-3.5 text-center font-bold">{r.score} <span className="text-[9px] text-slate-400 block font-normal">{r.percentage}%</span></td>
-                            <td className="px-5 py-3.5 text-center">
-                              <span className={`px-2.5 py-0.5 text-[9px] font-bold rounded-full ${r.status === 'pass' ? 'bg-green-50 text-green-700 border border-green-200/20' : 'bg-red-50 text-red-700 border border-red-200/20'}`}>{r.status.toUpperCase()}</span>
-                            </td>
-                            <td className="px-5 py-3.5 text-center">
-                              <button onClick={() => { setSelectedResultId(r._id); setView('result-details'); }} className="px-3 py-1.5 bg-slate-105 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 rounded-xl font-bold text-[10px] shadow-sm">Report</button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
             </div>
 
-            <div className="lg:col-span-5 space-y-6">
-              {results.length > 0 && (
-                <div className="glassmorphism p-5 rounded-2xl shadow-sm border">
-                  <h4 className="text-xs font-bold text-slate-800 dark:text-slate-200 uppercase mb-4 tracking-widest flex items-center gap-1.5"><Icons.Dashboard className="w-4 h-4 text-brand-500" /> Progress Chart</h4>
-                  <div className="h-44 relative">
-                    <LineChart data={chartData} options={chartOptions} />
-                  </div>
-                </div>
-              )}
-
+            <div className="lg:col-span-4 space-y-6">
               <div className="p-5 bg-brand-50/20 dark:bg-brand-950/10 border border-brand-100/50 dark:border-brand-900/20 rounded-2xl">
                 <h4 className="text-xs font-bold text-brand-700 dark:text-brand-300 uppercase tracking-widest mb-3 flex items-center gap-1"><Icons.Shield className="w-4 h-4 text-brand-500" /> Sandbox proctor rules</h4>
                 <ul className="text-[11px] text-slate-505 dark:text-slate-400 space-y-2 list-disc list-inside">
@@ -1191,6 +1151,62 @@
       const [questions, setQuestions] = useState([]);
       const [tab, setTab] = useState('settings');
       
+      // PDF auto-extractor states
+      const [qPaperFile, setQPaperFile] = useState(null);
+      const [aKeyFile, setAKeyFile] = useState(null);
+      const [extracting, setExtracting] = useState(false);
+      const [validationWarning, setValidationWarning] = useState('');
+
+      const handlePdfExtraction = async () => {
+        if (!qPaperFile) {
+          setError('Please select at least the Question Paper PDF.');
+          return;
+        }
+        setError('');
+        setSuccess('');
+        setExtracting(true);
+
+        try {
+          const formData = new FormData();
+          formData.append('questionPaper', qPaperFile);
+          if (aKeyFile) {
+            formData.append('answerKey', aKeyFile);
+          }
+
+          const token = localStorage.getItem('token');
+          const headers = {};
+          if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+          }
+
+          const res = await fetch(`${API_BASE}/uploads/extract-exam`, {
+            method: 'POST',
+            headers,
+            body: formData
+          });
+
+          const result = await res.json();
+          if (result.success) {
+            setQuestions(result.data.questions);
+            if (result.data.validationWarning) {
+              setValidationWarning(result.data.validationWarning);
+              setError(result.data.validationWarning);
+            } else {
+              setValidationWarning('');
+              setSuccess(`Successfully extracted ${result.data.totalQuestions} questions and matched answers!`);
+            }
+            setTab('questions');
+          } else {
+            setError(result.message || 'Failed to extract questions.');
+          }
+        } catch (err) {
+          console.error(err);
+          setError('An error occurred during PDF text extraction.');
+        } finally {
+          setExtracting(false);
+        }
+      };
+      
       const [manualText, setManualText] = useState('');
       const [manualOpts, setManualOpts] = useState(['', '', '', '']);
       const [manualCorrect, setManualCorrect] = useState(0);
@@ -1286,9 +1302,10 @@
           <div className="flex border-b border-slate-200 dark:border-slate-800 mb-6">
             <button onClick={() => setTab('settings')} className={`pb-3 text-xs font-bold border-b-2 px-4 ${tab === 'settings' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400'}`}>General Settings</button>
             <button onClick={() => setTab('questions')} className={`pb-3 text-xs font-bold border-b-2 px-4 ${tab === 'questions' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400'}`}>Questions Matrix ({questions.length})</button>
+            <button onClick={() => setTab('pdf-auto')} className={`pb-3 text-xs font-bold border-b-2 px-4 ${tab === 'pdf-auto' ? 'border-brand-500 text-brand-600' : 'border-transparent text-slate-400'}`}>⚡ PDF Auto-Extractor</button>
           </div>
 
-          {tab === 'settings' ? (
+          {tab === 'settings' && (
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
               <div className="lg:col-span-8 p-6 glassmorphism rounded-2xl space-y-4">
                 <div>
@@ -1343,7 +1360,9 @@
                 </div>
               </div>
             </div>
-          ) : (
+          )}
+          
+          {tab === 'questions' && (
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="p-6 border-2 border-dashed border-slate-355 dark:border-slate-800 rounded-2xl flex flex-col items-center justify-center">
@@ -1511,6 +1530,80 @@
             </div>
           )}
         </div>
+      )}
+
+      {tab === 'pdf-auto' && (
+        <div className="p-6 glassmorphism rounded-2xl space-y-6">
+          <div className="border-b pb-3 mb-4 text-left">
+            <h4 className="text-sm font-bold text-slate-800 dark:text-slate-105">Automatically Generate Exam from PDF</h4>
+            <p className="text-[11px] text-slate-450 mt-1">Upload a PDF containing questions, and optionally a separate PDF containing answer keys. The system will automatically extract and match them.</p>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Question Paper PDF */}
+            <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
+              <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Question Paper PDF (Mandatory)</span>
+              <span className="text-[10px] text-slate-400 mt-1 text-center">Contains the multiple-choice questions & options (A, B, C, D)</span>
+              
+              <input type="file" accept="application/pdf" id="q-pdf-input" className="hidden" onChange={e => setQPaperFile(e.target.files[0])} />
+              
+              {qPaperFile ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{qPaperFile.name}</span>
+                  <button onClick={() => setQPaperFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
+                </div>
+              ) : (
+                <button onClick={() => document.getElementById('q-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
+              )}
+            </div>
+
+            {/* Answer Key PDF */}
+            <div className="p-5 border border-dashed rounded-xl flex flex-col items-center justify-center bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-805">
+              <Icons.Upload className="w-8 h-8 text-brand-500 mb-2" />
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-300">Answer Key PDF (Optional)</span>
+              <span className="text-[10px] text-slate-400 mt-1 text-center">Contains answers matched to question numbers (e.g. 1. B, 2. C)</span>
+              
+              <input type="file" accept="application/pdf" id="a-pdf-input" className="hidden" onChange={e => setAKeyFile(e.target.files[0])} />
+              
+              {aKeyFile ? (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="text-xs text-brand-605 font-bold bg-brand-50 dark:bg-brand-950/20 px-2.5 py-1 rounded-lg border border-brand-200/30 truncate max-w-[200px]">{aKeyFile.name}</span>
+                  <button onClick={() => setAKeyFile(null)} className="text-xs text-red-500 font-bold">Remove</button>
+                </div>
+              ) : (
+                <button onClick={() => document.getElementById('a-pdf-input').click()} className="mt-4 px-3 py-1.5 bg-slate-105 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg text-[10px] font-bold">Choose File</button>
+              )}
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-4 border-t">
+            <button 
+              onClick={handlePdfExtraction} 
+              disabled={extracting || !qPaperFile} 
+              className="px-6 py-2.5 bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md flex items-center gap-2"
+            >
+              {extracting ? (
+                <>
+                  <div className="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  Extracting Text...
+                </>
+              ) : (
+                <>
+                  <span>⚡ Start Automatic Generation</span>
+                </>
+              )}
+            </button>
+          </div>
+
+          {validationWarning && (
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-950/15 border border-yellow-200 dark:border-yellow-900/30 rounded-xl space-y-1 text-left">
+              <h5 className="text-xs font-bold text-yellow-805 dark:text-yellow-400 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4" /> Extraction Validation Warning</h5>
+              <p className="text-[11px] text-yellow-750 dark:text-yellow-400 leading-relaxed font-bold">{validationWarning}</p>
+            </div>
+          )}
+        </div>
+      )}
       );
     };
 
@@ -1518,15 +1611,27 @@
     const ExamSetup = ({ testId, setView, setSelectedActiveSessionId }) => {
       const [test, setTest] = useState(null);
       const [loading, setLoading] = useState(true);
+      
+      // Permissions states
       const [camChecked, setCamChecked] = useState(false);
-      const [fullscreenChecked, setFullscreenChecked] = useState(false);
+      const [micChecked, setMicChecked] = useState(false);
+      
+      // Selfie states
+      const [selfieUrl, setSelfieUrl] = useState('');
       const [scanPassed, setScanPassed] = useState(false);
       const [scanning, setScanning] = useState(false);
+      
+      // Aadhaar states
+      const [aadhaarUrl, setAadhaarUrl] = useState('');
+      const [aadhaarChecked, setAadhaarChecked] = useState(false);
+      const [aadhaarMode, setAadhaarMode] = useState('file'); // 'file' or 'camera'
+      const [aadhaarUploading, setAadhaarUploading] = useState(false);
+
       const [error, setError] = useState('');
+      const [success, setSuccess] = useState('');
       
       const videoRef = useRef(null);
       const streamRef = useRef(null);
-      const canvasRef = useRef(null);
 
       useEffect(() => {
         api.get(`/tests/${testId}`).then(res => {
@@ -1538,78 +1643,119 @@
         };
       }, [testId]);
 
-      useEffect(() => {
-        let drawInterval;
-        if (camChecked && videoRef.current && canvasRef.current) {
-          const video = videoRef.current;
-          const canvas = canvasRef.current;
-          const ctx = canvas.getContext('2d');
-          
-          drawInterval = setInterval(() => {
-            if (video.readyState === 4) {
-              canvas.width = video.videoWidth;
-              canvas.height = video.videoHeight;
-              ctx.clearRect(0, 0, canvas.width, canvas.height);
-              
-              if (scanning) {
-                ctx.strokeStyle = '#2dd4bf';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
-                
-                ctx.fillStyle = 'rgba(45, 212, 191, 0.1)';
-                ctx.fillRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
-                
-                ctx.fillStyle = '#2dd4bf';
-                ctx.font = 'bold 14px sans-serif';
-                ctx.fillText('SCANNING LANDMARKS...', canvas.width*0.3, canvas.height*0.5);
-              } else if (scanPassed) {
-                ctx.strokeStyle = '#10b981';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(canvas.width*0.25, canvas.height*0.15, canvas.width*0.5, canvas.height*0.7);
-                
-                ctx.fillStyle = '#10b981';
-                ctx.font = 'bold 14px sans-serif';
-                ctx.fillText('MATCH CONFIRMED', canvas.width*0.33, canvas.height*0.5);
-              }
-            }
-          }, 60);
-        }
-        return () => clearInterval(drawInterval);
-      }, [camChecked, scanning, scanPassed]);
-
       const grantHardware = async () => {
         try {
           const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
           streamRef.current = stream;
           if (videoRef.current) videoRef.current.srcObject = stream;
           setCamChecked(true);
+          setMicChecked(true);
+          setError('');
         } catch (e) {
-          setError('Camera / Mic permissions are mandatory for proctored examinations.');
+          setError('Camera & Microphone permissions are mandatory for proctored examinations.');
         }
       };
 
-      const lockFullscreen = () => {
-        const docEl = document.documentElement;
-        if (docEl.requestFullscreen) docEl.requestFullscreen();
-        setFullscreenChecked(true);
-      };
-
-      const runBiometricScan = () => {
-        if (!camChecked) { setError('Grant webcam access first.'); return; }
+      const captureSelfie = async () => {
+        if (!camChecked || !videoRef.current) {
+          setError('Please grant camera access first.');
+          return;
+        }
         setScanning(true);
         setError('');
-        setTimeout(() => {
+        setSuccess('');
+        
+        try {
+          const video = videoRef.current;
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 480;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageBase64 = canvas.toDataURL('image/jpeg');
+          
+          const res = await api.post('/uploads/verification', { imageBase64 });
+          if (res.success) {
+            setSelfieUrl(res.url);
+            setScanPassed(true);
+            setSuccess('Live selfie profile captured successfully.');
+          } else {
+            setError(res.message || 'Failed to upload selfie profile.');
+          }
+        } catch (err) {
+          console.error(err);
+          setError('Error capturing selfie image.');
+        } finally {
           setScanning(false);
-          setScanPassed(true);
-        }, 2000);
+        }
+      };
+
+      const captureAadhaarWebcam = async () => {
+        if (!camChecked || !videoRef.current) {
+          setError('Please grant camera access first.');
+          return;
+        }
+        setAadhaarUploading(true);
+        setError('');
+        setSuccess('');
+        
+        try {
+          const video = videoRef.current;
+          const canvas = document.createElement('canvas');
+          canvas.width = video.videoWidth || 640;
+          canvas.height = video.videoHeight || 480;
+          const ctx = canvas.getContext('2d');
+          
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const imageBase64 = canvas.toDataURL('image/jpeg');
+          
+          const res = await api.post('/uploads/verification', { imageBase64 });
+          if (res.success) {
+            setAadhaarUrl(res.url);
+            setAadhaarChecked(true);
+            setSuccess('Aadhaar front card captured successfully.');
+          } else {
+            setError(res.message || 'Failed to upload captured Aadhaar card.');
+          }
+        } catch (err) {
+          console.error(err);
+          setError('Error capturing Aadhaar front image.');
+        } finally {
+          setAadhaarUploading(false);
+        }
+      };
+
+      const handleAadhaarUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        setAadhaarUploading(true);
+        setError('');
+        setSuccess('');
+        
+        try {
+          const res = await api.uploadFile('/uploads/verification', file);
+          if (res.success) {
+            setAadhaarUrl(res.url);
+            setAadhaarChecked(true);
+            setSuccess('Aadhaar card front image uploaded successfully.');
+          } else {
+            setError(res.message);
+          }
+        } catch (err) {
+          setError('Failed to upload Aadhaar card file.');
+        } finally {
+          setAadhaarUploading(false);
+        }
       };
 
       const handleLaunch = async () => {
-        if (!camChecked || !fullscreenChecked || !scanPassed) {
-          setError('Confirm all entry prerequisites before starting.'); return;
+        if (!camChecked || !micChecked || !scanPassed || !aadhaarChecked) {
+          setError('Complete all pre-exam identity verification steps first.');
+          return;
         }
         try {
-          const res = await api.post('/exams/start', { testId });
+          const res = await api.post('/exams/start', { testId, selfieUrl, aadhaarUrl });
           if (res.success) {
             if (streamRef.current) streamRef.current.getTracks().forEach(t => t.stop());
             setSelectedActiveSessionId(res.data._id);
@@ -1626,49 +1772,135 @@
         return <div className="py-20 text-center text-xs text-slate-400">Configuring hardware channels...</div>;
       }
 
+      const allVerified = camChecked && micChecked && scanPassed && aadhaarChecked;
+
       return (
         <div className="max-w-4xl mx-auto px-6 py-8 text-left font-sans">
-          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Secure Pre-Exam Setup</h2>
-          <p className="text-xs text-slate-505 mt-1">Module: <strong>{test?.title}</strong> • Limit: {test?.duration} mins</p>
+          <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Mandatory Candidate Verification</h2>
+          <p className="text-xs text-slate-500 mt-1">Please complete the identity verification steps before launching the attempt for: <strong>{test?.title}</strong></p>
           
           {error && <div className="p-3 bg-red-50 text-red-655 text-xs font-bold rounded-xl my-4 flex items-center gap-1.5"><Icons.Alert className="w-4 h-4 text-red-650" /> {error}</div>}
+          {success && <div className="p-3 bg-green-50 text-green-700 text-xs font-bold rounded-xl my-4 flex items-center gap-1.5"><Icons.Check className="w-4 h-4 text-green-600" /> {success}</div>}
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-6">
             <div className="space-y-4">
-              <div className="bg-slate-900 aspect-video rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-800 shadow-lg scanning-grid">
+              <div className="bg-slate-900 aspect-video rounded-2xl overflow-hidden relative flex items-center justify-center border border-slate-805 shadow-lg">
                 {camChecked ? (
-                  <>
-                    <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100 absolute inset-0"/>
-                    <canvas ref={canvasRef} className="w-full h-full object-cover transform -scale-x-100 absolute inset-0 z-10"/>
-                    {scanning && <div className="scan-laser"></div>}
-                  </>
+                  <video ref={videoRef} autoPlay muted className="w-full h-full object-cover transform -scale-x-100 absolute inset-0"/>
                 ) : (
-                  <div className="text-slate-505 text-[10px] font-bold flex flex-col items-center gap-1">
-                    <Icons.Camera className="w-8 h-8 text-slate-650 animate-pulse" />
+                  <div className="text-slate-500 text-[10px] font-bold flex flex-col items-center gap-1">
+                    <Icons.Camera className="w-8 h-8 text-slate-600 animate-pulse" />
                     <span>Camera preview offline</span>
                   </div>
                 )}
+                {scanning && (
+                  <div className="absolute inset-0 bg-brand-500/10 flex items-center justify-center border-2 border-brand-500 z-10">
+                    <span className="text-xs font-bold text-brand-400 bg-slate-950/80 px-3 py-1.5 rounded-lg animate-pulse">CAPTURING PROFILE...</span>
+                  </div>
+                )}
+              </div>
+
+              {/* Photo Previews */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-3 border text-center flex flex-col justify-center items-center h-28">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Selfie Profile</span>
+                  {selfieUrl ? (
+                    <img src={selfieUrl} className="w-16 h-16 rounded-lg object-cover border" alt="Selfie Preview" />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">No image captured</span>
+                  )}
+                </div>
+                <div className="bg-slate-100 dark:bg-slate-900 rounded-xl p-3 border text-center flex flex-col justify-center items-center h-28">
+                  <span className="text-[9px] font-bold text-slate-400 uppercase tracking-widest block mb-1">Aadhaar (Front)</span>
+                  {aadhaarUrl ? (
+                    <img src={aadhaarUrl} className="w-20 h-14 rounded-lg object-contain border" alt="Aadhaar Preview" />
+                  ) : (
+                    <span className="text-[10px] text-slate-400 italic">No image uploaded</span>
+                  )}
+                </div>
               </div>
             </div>
 
             <div className="p-6 glassmorphism rounded-2xl flex flex-col justify-between border">
-              <div className="space-y-4 text-xs font-bold text-slate-655 dark:text-slate-350">
-                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-455 border-b pb-2">Entry Prerequisites</h4>
+              <div className="space-y-5 text-xs font-bold text-slate-600 dark:text-slate-350">
+                <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-400 border-b pb-2">Verification Checklist</h4>
+                
+                {/* Step 1: Camera Permission */}
                 <div className="flex justify-between items-center py-1">
-                  <span>1. Webcam & Mic Access</span>
-                  {camChecked ? <span className="text-green-500 text-[10px] font-bold">READY</span> : <button onClick={grantHardware} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Grant</button>}
+                  <span className="flex items-center gap-1.5">
+                    {camChecked ? '🟢' : '⚪'} 1. Camera Permission
+                  </span>
+                  {camChecked ? (
+                    <span className="text-green-500 text-[10px] font-bold">GRANTED</span>
+                  ) : (
+                    <button onClick={grantHardware} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] shadow-sm">Grant Camera</button>
+                  )}
                 </div>
+
+                {/* Step 2: Mic Permission */}
                 <div className="flex justify-between items-center py-1">
-                  <span>2. Secure Fullscreen Lock</span>
-                  {fullscreenChecked ? <span className="text-green-500 text-[10px] font-bold">LOCKED</span> : <button onClick={lockFullscreen} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Lock</button>}
+                  <span className="flex items-center gap-1.5">
+                    {micChecked ? '🟢' : '⚪'} 2. Microphone Permission
+                  </span>
+                  {micChecked ? (
+                    <span className="text-green-500 text-[10px] font-bold">GRANTED</span>
+                  ) : (
+                    <button onClick={grantHardware} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded-lg text-[10px] shadow-sm">Grant Mic</button>
+                  )}
                 </div>
+
+                {/* Step 3: Selfie Capture */}
                 <div className="flex justify-between items-center py-1">
-                  <span>3. Face Profile Match</span>
-                  {scanPassed ? <span className="text-green-500 text-[10px] font-bold">CONFIRMED</span> : <button onClick={runBiometricScan} className="px-3 py-1 bg-brand-500 text-white rounded-lg text-[10px] shadow-sm">Scan</button>}
+                  <span className="flex items-center gap-1.5">
+                    {scanPassed ? '🟢' : '⚪'} 3. Live Selfie Capture
+                  </span>
+                  {scanPassed ? (
+                    <span className="text-green-500 text-[10px] font-bold">CAPTURED</span>
+                  ) : (
+                    <button onClick={captureSelfie} disabled={!camChecked} className="px-3 py-1.5 bg-brand-500 hover:bg-brand-600 disabled:bg-slate-300 dark:disabled:bg-slate-800 text-white rounded-lg text-[10px] shadow-sm">Take Selfie</button>
+                  )}
+                </div>
+
+                {/* Step 4: Aadhaar Front Card */}
+                <div className="space-y-3.5 border-t pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="flex items-center gap-1.5">
+                      {aadhaarChecked ? '🟢' : '⚪'} 4. Aadhaar Front Card
+                    </span>
+                    {aadhaarChecked && (
+                      <span className="text-green-500 text-[10px] font-bold">VERIFIED</span>
+                    )}
+                  </div>
+                  
+                  {!aadhaarChecked && (
+                    <div className="space-y-3 bg-slate-50 dark:bg-slate-905 p-3 rounded-xl border">
+                      <div className="flex gap-2 mb-1.5">
+                        <button onClick={() => setAadhaarMode('file')} className={`flex-1 py-1 rounded text-[9px] font-bold ${aadhaarMode === 'file' ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200' : 'text-slate-400'}`}>Upload File</button>
+                        <button onClick={() => setAadhaarMode('camera')} className={`flex-1 py-1 rounded text-[9px] font-bold ${aadhaarMode === 'camera' ? 'bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200' : 'text-slate-400'}`}>Use Camera</button>
+                      </div>
+
+                      {aadhaarMode === 'file' ? (
+                        <div>
+                          <input type="file" accept="image/*" id="aadhaar-upload-file" className="hidden" onChange={handleAadhaarUpload} />
+                          <button onClick={() => document.getElementById('aadhaar-upload-file').click()} disabled={aadhaarUploading} className="w-full py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded text-[9px] font-bold">
+                            {aadhaarUploading ? 'Uploading...' : 'Choose Aadhaar Front Image'}
+                          </button>
+                        </div>
+                      ) : (
+                        <button onClick={captureAadhaarWebcam} disabled={!camChecked || aadhaarUploading} className="w-full py-1.5 bg-brand-500 hover:bg-brand-600 text-white rounded text-[9px] font-bold shadow-sm">
+                          {aadhaarUploading ? 'Capturing...' : 'Capture Front Side from Webcam'}
+                        </button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
 
-              <button onClick={handleLaunch} className="w-full mt-6 py-2.5 bg-tealbrand-600 hover:bg-tealbrand-700 text-white font-bold rounded-xl text-xs shadow-md transition-all">
+              <button 
+                onClick={handleLaunch} 
+                disabled={!allVerified}
+                className="w-full mt-6 py-3 bg-tealbrand-605 hover:bg-tealbrand-700 disabled:bg-slate-200 dark:disabled:bg-slate-850 text-white font-bold rounded-xl text-xs shadow-md transition-all disabled:text-slate-400 dark:disabled:text-slate-600"
+              >
                 Launch Secure Attempt
               </button>
             </div>
@@ -2079,15 +2311,21 @@
 
     // 13. Result Details Page (Verifiable PDF download screen)
     const ResultDetails = ({ resultId, setView }) => {
+      const { user } = useContext(AuthContext);
       const [result, setResult] = useState(null);
       const [loading, setLoading] = useState(true);
 
       useEffect(() => {
+        if (user && user.role === 'student') {
+          setLoading(false);
+          return;
+        }
+
         api.get(`/results/${resultId}`).then(res => {
           if (res.success) setResult(res.data);
           setLoading(false);
         });
-      }, [resultId]);
+      }, [resultId, user]);
 
       const handleDownloadPdf = () => {
         const token = localStorage.getItem('token');
@@ -2098,11 +2336,29 @@
         return <div className="py-20 text-center text-xs text-slate-400">Syncing scorecard file...</div>;
       }
 
+      if (user && user.role === 'student') {
+        return (
+          <div className="max-w-xl mx-auto px-6 py-16 text-center font-sans">
+            <div className="p-8 glassmorphism border border-slate-200 dark:border-slate-800 rounded-3xl shadow-xl space-y-4">
+              <span className="text-4xl block animate-pulse">🛡️</span>
+              <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Exam Submitted Successfully</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-bold">
+                Your exam has been submitted successfully. Your results are under review. <br />
+                Please contact the administrator to obtain your result.
+              </p>
+              <button onClick={() => setView('student-dashboard')} className="mt-4 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold shadow-md">
+                Return to Dashboard
+              </button>
+            </div>
+          </div>
+        );
+      }
+
       const isPass = result?.status === 'pass';
 
       return (
         <div className="max-w-3xl mx-auto px-6 py-8 text-left font-sans">
-          <span onClick={() => setView(result?.student?.role === 'admin' ? 'admin-dashboard' : 'student-dashboard')} className="text-xs text-slate-455 hover:text-slate-700 cursor-pointer mb-4 inline-flex items-center gap-1 font-bold">
+          <span onClick={() => setView('admin-dashboard')} className="text-xs text-slate-455 hover:text-slate-700 cursor-pointer mb-4 inline-flex items-center gap-1 font-bold">
             <Icons.ArrowLeft className="w-3.5 h-3.5" /> Back to Dashboard
           </span>
           <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100">Scorecard Details</h2>
@@ -2115,18 +2371,18 @@
               </div>
 
               <div className="p-6 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl space-y-3.5 shadow-sm">
-                <h4 className="text-[10px] font-bold text-slate-450 uppercase pb-2 border-b">Marks secured</h4>
+                <h4 className="text-[10px] font-bold text-slate-455 uppercase pb-2 border-b">Marks secured</h4>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
                   <span>Qualifying Score:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{result.score} / {result.totalMarksPossible} Marks</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result?.score} / {result?.totalMarksPossible} Marks</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5 border-b">
                   <span>Percentage:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{result.percentage}%</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result?.percentage}%</span>
                 </div>
                 <div className="flex justify-between text-xs font-bold text-slate-655 dark:text-slate-400 py-1.5">
                   <span>Attempt Date:</span>
-                  <span className="text-slate-855 dark:text-slate-150">{new Date(result.createdAt).toLocaleDateString()}</span>
+                  <span className="text-slate-855 dark:text-slate-150">{result?.createdAt ? new Date(result.createdAt).toLocaleDateString() : ''}</span>
                 </div>
               </div>
             </div>
@@ -2135,7 +2391,7 @@
               <div>
                 <h4 className="text-[10px] font-bold text-slate-400 uppercase pb-2 border-b">Proctoring report</h4>
                 <div className="space-y-2.5 mt-3.5 text-xs font-bold text-slate-600 dark:text-slate-400">
-                  <div className="flex justify-between"><span>Warnings registered:</span><span className="text-slate-855 dark:text-slate-250 font-extrabold">{result.violationReport?.violations?.length || 0} warnings</span></div>
+                  <div className="flex justify-between"><span>Warnings registered:</span><span className="text-slate-855 dark:text-slate-250 font-extrabold">{result?.violationReport?.violations?.length || 0} warnings</span></div>
                 </div>
               </div>
               <button onClick={handleDownloadPdf} className="w-full mt-6 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-extrabold flex justify-center items-center gap-1.5 shadow-md">
@@ -2246,6 +2502,91 @@
       );
     };
 
+    // 15. Candidate Verification Logs (Admin only)
+    const AdminVerifications = () => {
+      const [sessions, setSessions] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        api.get('/exams/admin/sessions').then(res => {
+          if (res.success) {
+            setSessions(res.data);
+          }
+          setLoading(false);
+        });
+      }, []);
+
+      if (loading) {
+        return (
+          <div className="min-h-[50vh] flex flex-col items-center justify-center">
+            <div className="w-10 h-10 border-4 border-brand-500 border-t-transparent rounded-full animate-spin"></div>
+            <span className="text-xs text-slate-400 mt-2 font-bold">Syncing verification logs...</span>
+          </div>
+        );
+      }
+
+      return (
+        <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans animate-fade-in">
+          <div className="mb-6 flex justify-between items-center">
+            <div>
+              <h2 className="text-xl font-extrabold text-slate-800 dark:text-slate-100">Candidate Identity Verifications</h2>
+              <p className="text-xs text-slate-500 mt-0.5">Audit selfie photos and Aadhaar card uploads securely collected before examinations.</p>
+            </div>
+          </div>
+
+          {sessions.length === 0 ? (
+            <div className="p-12 text-center text-xs text-slate-400 glassmorphism rounded-2xl border border-dashed">No verification records found.</div>
+          ) : (
+            <div className="bg-white dark:bg-slate-900 border border-slate-205 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+              <table className="w-full text-xs">
+                <thead className="bg-slate-50 dark:bg-slate-800/60 font-bold text-slate-500 uppercase border-b border-slate-100 dark:border-slate-800">
+                  <tr>
+                    <th className="px-5 py-3 text-left">Candidate Info</th>
+                    <th className="px-5 py-3 text-center">Selfie Capture</th>
+                    <th className="px-5 py-3 text-center">Aadhaar Front</th>
+                    <th className="px-5 py-3 text-left">Exam Details</th>
+                    <th className="px-5 py-3 text-center">Started</th>
+                    <th className="px-5 py-3 text-center">Submitted</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 dark:divide-slate-800/40">
+                  {sessions.map(s => (
+                    <tr key={s._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/20 transition-colors">
+                      <td className="px-5 py-3.5 text-left">
+                        <div className="font-bold text-slate-800 dark:text-slate-200">{s.student?.name}</div>
+                        <div className="text-[10px] text-slate-400 mt-0.5">{s.student?.email}</div>
+                        <div className="text-[9px] text-slate-550 font-mono mt-0.5">ID: {s.student?._id}</div>
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {s.selfieUrl ? (
+                          <a href={s.selfieUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={s.selfieUrl} alt="Selfie" className="w-12 h-12 rounded-lg object-cover mx-auto border hover:scale-105 transition-transform cursor-pointer"/>
+                          </a>
+                        ) : <span className="text-slate-400">-</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-center">
+                        {s.aadhaarUrl ? (
+                          <a href={s.aadhaarUrl} target="_blank" rel="noopener noreferrer">
+                            <img src={s.aadhaarUrl} alt="Aadhaar" className="w-16 h-10 rounded-md object-contain mx-auto border hover:scale-105 transition-transform cursor-pointer"/>
+                          </a>
+                        ) : <span className="text-slate-400">-</span>}
+                      </td>
+                      <td className="px-5 py-3.5 text-left font-bold text-slate-800 dark:text-slate-200">
+                        {s.test?.title}
+                        <span className={`block text-[9px] font-bold uppercase mt-1 ${s.status === 'submitted' ? 'text-green-500' : s.status === 'disqualified' ? 'text-red-500' : 'text-yellow-500'}`}>{s.status}</span>
+                      </td>
+                      <td className="px-5 py-3.5 text-center text-slate-500">{new Date(s.startTime).toLocaleString()}</td>
+                      <td className="px-5 py-3.5 text-center text-slate-500">{s.endTime ? new Date(s.endTime).toLocaleString() : '-'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      );
+    };
+
     // --- MAIN SINGLE PAGE APPLICATION WRAPPER ---
     function App() {
       const { user, loading } = useContext(AuthContext);
@@ -2309,6 +2650,9 @@
             )}
             {view === 'admin-live-monitor' && (
               <LiveMonitor />
+            )}
+            {view === 'admin-verifications' && (
+              <AdminVerifications />
             )}
           </div>
         </div>
