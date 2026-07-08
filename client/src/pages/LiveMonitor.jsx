@@ -9,7 +9,7 @@ const LiveMonitor = () => {
 
   useEffect(() => {
     // Connect to WebSocket server
-    socketRef.current = io('http://localhost:5000');
+    socketRef.current = io(window.location.origin);
 
     // Join Admin Monitoring Lobby Room
     socketRef.current.emit('join-admin-lobby');

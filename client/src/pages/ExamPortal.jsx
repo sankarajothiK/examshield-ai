@@ -93,7 +93,7 @@ const ExamPortal = () => {
   useEffect(() => {
     if (!loading && session && user) {
       // Connect to socket server
-      socketRef.current = io('http://localhost:5000');
+      socketRef.current = io(window.location.origin);
       
       socketRef.current.emit('join-exam', {
         sessionId: id,
