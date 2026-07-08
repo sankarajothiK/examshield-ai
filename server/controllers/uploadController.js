@@ -117,6 +117,63 @@ const uploadVerification = async (req, res) => {
 };
 
 // @desc    Extract Question Paper and Answer Key PDFs and match them
+// Helper to extract answers from text (supports standard pairs and grid tables)
+const extractAnswerMap = (text) => {
+  const answerMap = new Map();
+  
+  // 1. Try standard pair matching: e.g. "1. B", "Q1: C", "1) D"
+  const pairRegex = /\b(\d+)\s*[\.\-\)\:\s=]+\s*([A-D])\b/gi;
+  let match;
+  while ((match = pairRegex.exec(text)) !== null) {
+    const qNum = parseInt(match[1]);
+    const ansLetter = match[2].toUpperCase();
+    const ansIdx = ansLetter.charCodeAt(0) - 65;
+    answerMap.set(qNum, ansIdx);
+  }
+  
+  // If we found a significant number of matches, return them
+  if (answerMap.size > 2) {
+    return answerMap;
+  }
+  
+  // Clear any partial noise matches if we fall back
+  answerMap.clear();
+
+  // 2. Try grid table fallback (questions line followed by answers line)
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(l => l.length > 0);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Find all integers (optionally prefixed by Q)
+    const qNums = [];
+    const headerRegex = /\bQ?(\d+)\b/gi;
+    let headerMatch;
+    while ((headerMatch = headerRegex.exec(line)) !== null) {
+      qNums.push(parseInt(headerMatch[1]));
+    }
+    
+    // We treat it as a grid header if it has multiple question numbers
+    if (qNums.length > 1) {
+      // Look at subsequent lines (up to 4 lines ahead) to find matching answer letters
+      for (let j = i + 1; j < Math.min(lines.length, i + 5); j++) {
+        const nextLine = lines[j];
+        const parts = nextLine.split(/\s+/).map(p => p.trim().toUpperCase());
+        const answers = parts.filter(p => ['A', 'B', 'C', 'D'].includes(p));
+        
+        if (answers.length === qNums.length) {
+          for (let k = 0; k < qNums.length; k++) {
+            answerMap.set(qNums[k], answers[k].charCodeAt(0) - 65);
+          }
+          break; // found match, skip looking further for this row
+        }
+      }
+    }
+  }
+  
+  return answerMap;
+};
+
+// @desc    Extract Question Paper and Answer Key PDFs and match them
 // @route   POST /api/uploads/extract-exam
 // @access  Private/Admin
 const extractExamFromPdfs = async (req, res) => {
@@ -149,7 +206,7 @@ const extractExamFromPdfs = async (req, res) => {
     let validationWarning = '';
     let success = true;
 
-    // 3. If separate Answer Key PDF is uploaded, match answers
+    // 3. Match answers depending on mode
     if (aKeyFile) {
       let aText = '';
       try {
@@ -159,20 +216,12 @@ const extractExamFromPdfs = async (req, res) => {
         return res.status(400).json({ success: false, message: 'Failed to extract text from Answer Key PDF: ' + err.message });
       }
 
-      // Parse answers from Answer Key
-      const answerMap = new Map();
-      const regex = /\b(\d+)\s*[\.\-\)\:\s=]+\s*([A-D])\b/gi;
-      let match;
-      while ((match = regex.exec(aText)) !== null) {
-        const qNum = parseInt(match[1]);
-        const ansLetter = match[2].toUpperCase();
-        const ansIdx = ansLetter.charCodeAt(0) - 65; // A=0, B=1, C=2, D=3
-        answerMap.set(qNum, ansIdx);
-      }
+      // Parse answers using our advanced matching engine
+      const answerMap = extractAnswerMap(aText);
 
       matchedQuestions = parsedQuestions.map((q, idx) => {
         const qNum = idx + 1;
-        let correctAnswer = q.correctAnswer; // default to inline if any
+        let correctAnswer = q.correctAnswer;
         let matched = false;
 
         if (answerMap.has(qNum)) {
@@ -197,17 +246,45 @@ const extractExamFromPdfs = async (req, res) => {
       if (unmatchedQuestions.length > 0) {
         success = false;
         if (validationWarning) validationWarning += ' ';
-        validationWarning += `Some questions (like Question ${matchedQuestions.findIndex(q => !q.matched) + 1}) could not be matched with an answer key automatically.`;
+        validationWarning += `Some questions could not be matched with an answer key automatically.`;
       }
     } else {
-      // Single PDF mode: answers are inline
-      matchedQuestions = parsedQuestions.map(q => ({ ...q, matched: q.correctAnswer !== undefined }));
-      totalAnswersExtracted = matchedQuestions.filter(q => q.correctAnswer !== undefined).length;
+      // Single PDF mode: check if the same PDF contains the Answer Key block (e.g. Page 15)
+      const answerMap = extractAnswerMap(qText);
       
-      const unmatchedQuestions = matchedQuestions.filter(q => q.correctAnswer === 0 && !q.matched);
-      if (unmatchedQuestions.length > 0) {
-        success = false;
-        validationWarning = 'Single PDF parsed. Some questions do not contain inline answers (defaulted to Option A).';
+      if (answerMap.size > 0) {
+        matchedQuestions = parsedQuestions.map((q, idx) => {
+          const qNum = idx + 1;
+          let correctAnswer = q.correctAnswer;
+          let matched = false;
+
+          if (answerMap.has(qNum)) {
+            correctAnswer = answerMap.get(qNum);
+            matched = true;
+          }
+
+          return {
+            ...q,
+            correctAnswer,
+            matched,
+          };
+        });
+
+        totalAnswersExtracted = answerMap.size;
+        if (totalQuestions !== totalAnswersExtracted) {
+          success = false;
+          validationWarning = `Mismatch: Extracted ${totalQuestions} questions from the text, but found ${totalAnswersExtracted} answer keys on the Answer Key sheet.`;
+        }
+      } else {
+        // Fallback to inline answers (Answer: B, Ans: C)
+        matchedQuestions = parsedQuestions.map(q => ({ ...q, matched: q.correctAnswer !== undefined }));
+        totalAnswersExtracted = matchedQuestions.filter(q => q.correctAnswer !== undefined).length;
+        
+        const unmatchedQuestions = matchedQuestions.filter(q => q.correctAnswer === 0 && !q.matched);
+        if (unmatchedQuestions.length > 0) {
+          success = false;
+          validationWarning = 'Single PDF parsed. Some questions do not contain inline answers (defaulted to Option A).';
+        }
       }
     }
 
