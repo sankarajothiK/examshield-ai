@@ -1,4 +1,4 @@
-const { PDFParse } = require('pdf-parse');
+const pdfParse = require('pdf-parse');
 
 /**
  * Core text question parser state machine.
@@ -96,8 +96,7 @@ const parseUploadedFile = async (buffer, fileName) => {
 
   if (extension === 'pdf') {
     try {
-      const parserInstance = new PDFParse(new Uint8Array(buffer));
-      const parsedData = await parserInstance.getText();
+      const parsedData = await pdfParse(buffer);
       textContent = parsedData.text;
     } catch (err) {
       console.error('Error parsing PDF content:', err.message);

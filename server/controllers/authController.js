@@ -7,9 +7,9 @@ const sendEmail = require('../services/emailService');
 // @access  Public
 const registerStudent = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, employeeId, email, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !employeeId || !email || !password) {
       return res.status(400).json({ success: false, message: 'Please add all fields' });
     }
 
@@ -23,11 +23,12 @@ const registerStudent = async (req, res) => {
 
     const user = await User.create({
       name,
+      employeeId,
       email,
       password,
       role: 'student',
       verificationCode,
-      isVerified: false,
+      isVerified: true,
     });
 
     if (user) {
@@ -58,6 +59,7 @@ const registerStudent = async (req, res) => {
         data: {
           _id: user._id,
           name: user.name,
+          employeeId: user.employeeId,
           email: user.email,
           role: user.role,
           isVerified: user.isVerified,
@@ -103,6 +105,7 @@ const loginUser = async (req, res) => {
       data: {
         _id: user._id,
         name: user.name,
+        employeeId: user.employeeId,
         email: user.email,
         role: user.role,
         isVerified: user.isVerified,

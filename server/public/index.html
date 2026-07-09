@@ -249,9 +249,9 @@
         return res;
       };
 
-      const register = async (name, email, password) => {
+      const register = async (name, employeeId, email, password) => {
         setLoading(true);
-        const res = await api.post('/auth/register', { name, email, password });
+        const res = await api.post('/auth/register', { name, employeeId, email, password });
         setLoading(false);
         return res;
       };
@@ -707,8 +707,7 @@
         try {
           const res = await login(email, password, role);
           if (res.success) {
-            if (!res.data.isVerified && res.data.role === 'student') setView('verify');
-            else setView(res.data.role === 'admin' ? 'admin-dashboard' : 'student-dashboard');
+            setView(res.data.role === 'admin' ? 'admin-dashboard' : 'student-dashboard');
           } else {
             setError(res.message || 'Login credentials mismatch.');
           }
@@ -753,25 +752,35 @@
     const RegisterPage = ({ setView }) => {
       const { register, setUser } = useContext(AuthContext);
       const [name, setName] = useState('');
+      const [employeeId, setEmployeeId] = useState('');
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
+      const [confirmPassword, setConfirmPassword] = useState('');
       const [error, setError] = useState('');
       const [success, setSuccess] = useState('');
       const [loading, setLoading] = useState(false);
 
       const handleSubmit = async (e) => {
         e.preventDefault();
+        if (password !== confirmPassword) {
+          setError('Passwords do not match.');
+          return;
+        }
+        if (password.length < 6) {
+          setError('Password must contain at least 6 characters.');
+          return;
+        }
         setLoading(true);
         setError('');
         setSuccess('');
         try {
-          const res = await register(name, email, password);
+          const res = await register(name, employeeId, email, password);
           if (res.success) {
-            setSuccess('Registration successful! Please check your email for the verification code.');
+            setSuccess('Registration successful! Redirecting to student dashboard...');
             setTimeout(() => {
               localStorage.setItem('token', res.data.token);
               setUser(res.data);
-            }, 1800);
+            }, 1500);
           } else {
             setError(res.message || 'Registration failed.');
           }
@@ -786,7 +795,7 @@
         <div className="min-h-[90vh] flex items-center justify-center px-6 animate-fade-in">
           <div className="w-full max-w-sm glassmorphism p-8 rounded-2xl shadow-xl text-left z-10">
             <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 text-center">Register Account</h2>
-            {error && <div className="p-3 bg-red-50 text-red-650 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" />{error}</div>}
+            {error && <div className="p-3 bg-red-50 text-red-600 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Alert className="w-3.5 h-3.5" />{error}</div>}
             {success && <div className="p-3 bg-green-50 text-green-700 text-xs font-bold rounded-xl mb-4 mt-2 flex items-center gap-1"><Icons.Check className="w-3.5 h-3.5" />{success}</div>}
             <form onSubmit={handleSubmit} className="space-y-4 mt-4">
               <div>
@@ -794,12 +803,20 @@
                 <input type="text" required value={name} onChange={e => setName(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="John Doe"/>
               </div>
               <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Employee ID</label>
+                <input type="text" required value={employeeId} onChange={e => setEmployeeId(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="EMP-1234"/>
+              </div>
+              <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Email Address</label>
-                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-805 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="john.doe@med.com"/>
+                <input type="email" required value={email} onChange={e => setEmail(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-205 dark:border-slate-805 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="john.doe@med.com"/>
               </div>
               <div>
                 <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Password</label>
                 <input type="password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="Min 6 characters"/>
+              </div>
+              <div>
+                <label className="block text-[10px] font-bold uppercase text-slate-455 tracking-wider">Confirm Password</label>
+                <input type="password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full bg-white dark:bg-slate-955 border border-slate-200 dark:border-slate-800 rounded-xl py-2.5 px-4 text-xs focus:ring-2 focus:ring-brand-500 outline-none mt-1.5" placeholder="Confirm your password"/>
               </div>
               <button type="submit" disabled={loading || success} className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex justify-center">
                 {loading ? 'Creating Profile...' : success ? 'Redirecting...' : 'Register Profile'}
@@ -905,6 +922,7 @@
       const [tests, setTests] = useState([]);
       const [results, setResults] = useState([]);
       const [loading, setLoading] = useState(true);
+      const [currentTime, setCurrentTime] = useState(new Date());
 
       const loadData = async () => {
         try {
@@ -919,7 +937,13 @@
         }
       };
 
-      useEffect(() => { loadData(); }, []);
+      useEffect(() => { 
+        loadData(); 
+        const interval = setInterval(() => {
+          setCurrentTime(new Date());
+        }, 1000);
+        return () => clearInterval(interval);
+      }, []);
 
       if (loading) {
         return (
@@ -930,23 +954,30 @@
         );
       }
 
-      const now = new Date();
-      const visibleTests = tests.filter(t => {
-        const attemptedCount = results.filter(r => r.test?._id === t._id).length;
-        const startDate = new Date(t.startDate);
-        const endDate = new Date(t.endDate);
-        const isOpen = now >= startDate && now <= endDate;
-        const diffMs = startDate - now;
-        const isStartingSoon = diffMs > 0 && diffMs <= 15 * 60 * 1000;
-        return (isOpen || isStartingSoon) && attemptedCount < t.maxAttempts;
-      });
+      const getCountdownText = (startDate) => {
+        const diffMs = new Date(startDate) - currentTime;
+        if (diffMs <= 0) return '';
+        const totalSecs = Math.floor(diffMs / 1000);
+        const hours = Math.floor(totalSecs / 3600);
+        const mins = Math.floor((totalSecs % 3600) / 60);
+        const secs = totalSecs % 60;
+        
+        const parts = [];
+        if (hours > 0) parts.push(`${hours.toString().padStart(2, '0')}h`);
+        parts.push(`${mins.toString().padStart(2, '0')}m`);
+        parts.push(`${secs.toString().padStart(2, '0')}s`);
+        return parts.join(' ');
+      };
+
+      // Filter out tests that are not published
+      const visibleTests = tests.filter(t => t.status === 'published');
 
       return (
         <div className="max-w-6xl mx-auto px-6 py-8 text-left font-sans">
           <div className="glassmorphism p-6 rounded-2xl mb-8 relative overflow-hidden flex justify-between items-center border border-brand-100/30">
             <div className="absolute top-0 right-0 w-48 h-48 bg-brand-500/5 rounded-full blur-2xl -mr-10 -mt-10"></div>
             <div className="relative z-10">
-              <span className="text-[9px] font-extrabold text-tealbrand-600 dark:text-tealbrand-400 tracking-widest uppercase block">Biomedical screening</span>
+              <span className="text-[9px] font-extrabold text-tealbrand-600 dark:text-tealbrand-400 tracking-widest uppercase block">Medical entrance academy</span>
               <h2 className="text-2xl font-extrabold text-slate-800 dark:text-slate-100 mt-1 leading-none font-sans">Qualifying Entrance Portal</h2>
               <p className="text-xs text-slate-505 dark:text-slate-400 mt-2">Audit proctored entrance exams, check scorecard files, and review integrity logs.</p>
             </div>
@@ -956,7 +987,7 @@
             <div className="lg:col-span-8 space-y-6">
               <div>
                 <h3 className="text-sm font-extrabold text-slate-850 dark:text-slate-200 mb-4 flex items-center gap-1.5">
-                  <span className="flex w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span> Live Qualifying Exams
+                  <span className="flex w-2.5 h-2.5 bg-red-500 rounded-full animate-ping"></span> Live & Scheduled Examinations
                 </h3>
                 {visibleTests.length === 0 ? (
                   <div className="p-6 glassmorphism rounded-2xl text-center text-xs text-slate-400 border border-dashed">Zero active qualifying exams available.</div>
@@ -965,40 +996,72 @@
                     {visibleTests.map(t => {
                       const startDate = new Date(t.startDate);
                       const endDate = new Date(t.endDate);
-                      const isOpen = now >= startDate && now <= endDate;
-                      const diffMs = startDate - now;
-                      const isStartingSoon = diffMs > 0 && diffMs <= 15 * 60 * 1000;
-                      const startTimeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                      const attemptedCount = results.filter(r => r.test?._id === t._id).length;
+                      
+                      const isOpen = currentTime >= startDate && currentTime <= endDate;
+                      const isUpcoming = currentTime < startDate;
+                      const isEnded = currentTime > endDate;
+                      const isMaxAttempts = attemptedCount >= t.maxAttempts;
+                      
+                      const countdown = isUpcoming ? getCountdownText(startDate) : '';
+                      const startTimeStr = startDate.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true });
+                      const startDateStr = startDate.toLocaleDateString([], { month: 'short', day: 'numeric' });
 
                       return (
-                        <div key={t._id} className="p-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm hover:border-brand-300 transition-colors">
+                        <div key={t._id} className={`p-5 bg-white dark:bg-slate-900 border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-sm transition-colors ${
+                          isMaxAttempts || isEnded ? 'opacity-70 border-slate-200 dark:border-slate-800' : 'border-slate-200 dark:border-slate-800 hover:border-brand-300'
+                        }`}>
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
                               <span className="text-[9px] font-bold px-2 py-0.5 bg-brand-50 text-brand-700 rounded uppercase border">{t.questions.length} Qs</span>
-                              {isOpen ? (
+                              {isMaxAttempts ? (
+                                <span className="text-[9px] font-bold px-2 py-0.5 bg-slate-100 text-slate-500 rounded border">Attempted</span>
+                              ) : isOpen ? (
                                 <span className="text-[9px] font-bold px-2 py-0.5 bg-green-50 text-green-700 rounded border border-green-200/20">🟢 Live Now</span>
+                              ) : isUpcoming ? (
+                                <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200/20">⏰ Upcoming</span>
                               ) : (
-                                <span className="text-[9px] font-bold px-2 py-0.5 bg-amber-50 text-amber-700 rounded border border-amber-200/20">⏰ Starting Soon</span>
+                                <span className="text-[9px] font-bold px-2 py-0.5 bg-red-50 text-red-700 rounded border border-red-200/20">🔴 Closed</span>
                               )}
+                              <span className="text-[9px] text-slate-400 font-bold ml-1">Attempts: {attemptedCount} / {t.maxAttempts}</span>
                             </div>
                             <h4 className="text-sm font-extrabold text-slate-850 dark:text-slate-100 mt-2">{t.title}</h4>
                             <p className="text-[11px] text-slate-455 dark:text-slate-400 mt-1 leading-relaxed">{t.description}</p>
-                            {isStartingSoon && (
-                              <p className="text-[10px] text-amber-600 dark:text-amber-400 font-bold mt-1.5">Exam will be live at {startTimeStr} (Starts in {Math.ceil(diffMs / 60000)} min)</p>
+                            
+                            {isUpcoming && (
+                              <div className="mt-2 p-2.5 bg-amber-500/5 border border-amber-200/20 rounded-xl">
+                                <p className="text-[10px] text-amber-600 dark:text-amber-400 font-extrabold">
+                                  ⚡ Exam will be live at {startDateStr} @ {startTimeStr}
+                                </p>
+                                {countdown && (
+                                  <p className="text-[11px] text-slate-700 dark:text-slate-350 font-bold mt-0.5">
+                                    Starts in: <strong className="text-amber-600 dark:text-amber-400 font-mono text-xs">{countdown}</strong>
+                                  </p>
+                                )}
+                              </div>
                             )}
+                            
                             <div className="flex gap-4 mt-3 text-[10px] text-slate-400 font-bold items-center">
                               <span className="flex items-center gap-1"><Icons.Clock className="w-3.5 h-3.5" /> {t.duration} Mins</span>
                               <span className="flex items-center gap-1"><Icons.Check className="w-3.5 h-3.5 text-green-500" /> Pass: {t.passingMarks}</span>
                             </div>
                           </div>
                           
-                          {isOpen ? (
+                          {isMaxAttempts ? (
+                            <button disabled className="px-4 py-2.5 bg-slate-105 text-slate-400 dark:text-slate-500 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 cursor-not-allowed border">
+                              <Icons.Check className="w-3.5 h-3.5" /> Max Attempts
+                            </button>
+                          ) : isOpen ? (
                             <button onClick={() => { setSelectedTestId(t._id); setView('student-exam-setup'); }} className="px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 hover:translate-x-0.5 transition-transform shadow-sm">
-                              <Icons.Play className="w-3.5 h-3.5 text-white" /> Enter Setup
+                              <Icons.Play className="w-3.5 h-3.5 text-white" /> Start Exam
+                            </button>
+                          ) : isUpcoming ? (
+                            <button disabled className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 cursor-not-allowed border border-slate-200/50 dark:border-slate-700">
+                              <Icons.Lock className="w-3.5 h-3.5" /> Locked
                             </button>
                           ) : (
                             <button disabled className="px-4 py-2.5 bg-slate-100 dark:bg-slate-800 text-slate-400 dark:text-slate-500 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 shrink-0 cursor-not-allowed border border-slate-200/50 dark:border-slate-700">
-                              <Icons.Lock className="w-3.5 h-3.5" /> Locked
+                              <Icons.Alert className="w-3.5 h-3.5" /> Closed
                             </button>
                           )}
                         </div>
@@ -2792,7 +2855,6 @@
         if (!loading) {
           if (user) {
             if (user.role === 'admin') setView('admin-dashboard');
-            else if (!user.isVerified) setView('verify');
             else setView('student-dashboard');
           } else {
             setView('landing');

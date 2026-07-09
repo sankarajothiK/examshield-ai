@@ -168,10 +168,53 @@ const downloadResultPdf = async (req, res) => {
   }
 };
 
+// @desc    Get all exam results (Admin only)
+// @route   GET /api/results
+// @access  Private/Admin
+const getAllResults = async (req, res) => {
+  try {
+    const { search, status, testId } = req.query;
+    
+    const query = {};
+    if (status) {
+      query.status = status;
+    }
+    if (testId) {
+      query.test = testId;
+    }
+    
+    if (search) {
+      const User = require('../models/User');
+      const matchedUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { email: { $regex: search, $options: 'i' } },
+          { employeeId: { $regex: search, $options: 'i' } }
+        ]
+      }).select('_id');
+      
+      const userIds = matchedUsers.map(u => u._id);
+      query.student = { $in: userIds };
+    }
+
+    const results = await Result.find(query)
+      .populate('student', 'name email employeeId avatar')
+      .populate('test', 'title duration passingMarks')
+      .populate('session', 'selfieUrl aadhaarUrl ocrName ocrAadhaar verificationStatus')
+      .populate('violationReport')
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({ success: true, count: results.length, data: results });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
 module.exports = {
   getMyResults,
   getResultById,
   getTestLeaderboard,
   getAdminReports,
   downloadResultPdf,
+  getAllResults,
 };
