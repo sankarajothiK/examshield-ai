@@ -1882,6 +1882,12 @@
         };
       }, [testId]);
 
+      useEffect(() => {
+        if (streamRef.current && videoRef.current) {
+          videoRef.current.srcObject = streamRef.current;
+        }
+      }, [step, aadhaarMode]);
+
       const grantHardware = async () => {
         try {
           setError('');
@@ -2134,6 +2140,7 @@
     const ExamPortal = ({ sessionId, setView, setSelectedResultId }) => {
       const { user } = useContext(AuthContext);
       const [questions, setQuestions] = useState([]);
+      const [test, setTest] = useState(null);
       const [currentIdx, setCurrentIdx] = useState(0);
       const [answers, setAnswers] = useState({});
       const [warningCount, setWarningCount] = useState(0);
@@ -2191,6 +2198,7 @@
               const testRes = await api.get(`/tests/${sessRes.data.test._id}`);
               if (testRes.success) {
                 setQuestions(testRes.data.questions);
+                setTest(testRes.data);
                 setTimeLeft(sessRes.data.timeLeft);
                 if (sessRes.data.timeLeft <= 0) handleAutoSubmit();
               }
