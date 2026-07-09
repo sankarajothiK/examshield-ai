@@ -751,21 +751,27 @@
 
     // 4. Register Page
     const RegisterPage = ({ setView }) => {
-      const { register } = useContext(AuthContext);
+      const { register, setUser } = useContext(AuthContext);
       const [name, setName] = useState('');
       const [email, setEmail] = useState('');
       const [password, setPassword] = useState('');
       const [error, setError] = useState('');
+      const [success, setSuccess] = useState('');
       const [loading, setLoading] = useState(false);
 
       const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setSuccess('');
         try {
           const res = await register(name, email, password);
           if (res.success) {
-            setView('verify');
+            setSuccess('Registration successful! Please check your email for the verification code.');
+            setTimeout(() => {
+              localStorage.setItem('token', res.data.token);
+              setUser(res.data);
+            }, 1800);
           } else {
             setError(res.message || 'Registration failed.');
           }
